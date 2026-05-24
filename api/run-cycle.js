@@ -1,10 +1,6 @@
 // ============================================
 // POST /api/run-cycle
-// Main AI trading loop:
-//   1. Fetch forex prices
-//   2. For each trader: close some positions, open new ones via AI
-//   3. Record equity snapshot
-// Called by cron-job.org every 15 minutes
+// Main AI trading loop
 // ============================================
 import { getSupabase, fetchForexPrices, computePnL, callAI, parseAIDecision, PAIRS } from './_lib.js';
 
@@ -20,8 +16,7 @@ const NEWS_POOL = [
 ];
 
 async function refreshNews(sb) {
-  // Pick 4 random news, replace cache
-  await sb.from('news_cache').delete().neq('id', 0); // clear all
+  await sb.from('news_cache').delete().neq('id', 0);
   const picked = [];
   const pool = [...NEWS_POOL];
   for (let i = 0; i < 4 && pool.length; i++) {
@@ -36,42 +31,67 @@ async function refreshNews(sb) {
 
 function buildMarketContext(prices, news, trader) {
   const relevantNews = news
-    .filter(n => n.affected_pairs.some(p => trader.preferred_pairs.includes(p)))
+    .filter(n => (n.affected_pairs || []).some(p => trader.preferred_pairs.includes(p)))
     .slice(0, 3);
   const newsTxt = relevantNews.length
-    ? relevantNews.map(n => `- [${n.sentiment.toUpperCase()}] ${n.title}`).join('\n')
+    ? relevantNews.map(n => `- [${(n.sentiment||'neutral').toUpperCase()}] ${n.title}`).join('\n')
     : '(no major news right now)';
   const pricesTxt = trader.preferred_pairs
-    .map(p => `- ${p}: ${prices[p]?.toFixed(PAIRS[p].decimals)}`)
+    .map(p => `- ${p}: ${(prices[p] || 0).toFixed(PAIRS[p].decimals)}`)
     .join('\n');
   return { newsTxt, pricesTxt };
 }
 
 export default async function handler(req, res) {
+  const startTime = Date.now();
   try {
     const sb = getSupabase();
-    const prices = await fetchForexPrices();
+
+    // === STEP 1: Fetch forex prices (with detailed error) ===
+    let prices;
+    try {
+      prices = await fetchForexPrices();
+    } catch (fetchErr) {
+      console.error('fetchForexPrices failed:', fetchErr);
+      // Use fallback prices instead of failing entire cycle
+      console.warn('Using fallback prices');
+      prices = {
+        'EUR/USD': 1.085, 'GBP/USD': 1.263, 'USD/JPY': 149.82,
+        'AUD/USD': 0.658, 'USD/CAD': 1.357, 'EUR/JPY': 162.53
+      };
+    }
+
     if (!prices || Object.keys(prices).length === 0) {
-      throw new Error('Failed to fetch forex prices');
+      return res.status(500).json({ error: 'Could not get any forex prices' });
     }
 
-    // Refresh news once per cycle (30% chance)
+    // === STEP 2: Refresh news ===
     let news;
-    if (Math.random() < 0.3) {
-      news = await refreshNews(sb);
-    } else {
-      const { data } = await sb.from('news_cache').select('*').limit(10);
-      news = data || [];
+    try {
+      if (Math.random() < 0.3) {
+        news = await refreshNews(sb);
+      } else {
+        const { data } = await sb.from('news_cache').select('*').limit(10);
+        news = data || [];
+        // If empty (first run), seed news
+        if (news.length === 0) news = await refreshNews(sb);
+      }
+    } catch (newsErr) {
+      console.warn('News error:', newsErr.message);
+      news = [];
     }
 
-    // Get all traders & open trades
-    const [{ data: traders }, { data: openTrades }] = await Promise.all([
+    // === STEP 3: Get traders & open trades ===
+    const [{ data: traders, error: trErr }, { data: openTrades, error: otErr }] = await Promise.all([
       sb.from('traders').select('*').order('id'),
       sb.from('trades').select('*').eq('status', 'OPEN')
     ]);
+    if (trErr) throw new Error('Traders fetch: ' + trErr.message);
+    if (otErr) throw new Error('Open trades fetch: ' + otErr.message);
 
     const log = [];
 
+    // === STEP 4: Process each trader ===
     for (const trader of traders) {
       try {
         const myOpen = openTrades.filter(t => t.trader_id === trader.id);
@@ -83,30 +103,29 @@ export default async function handler(req, res) {
           ? myOpen.map(t => `- ${t.pair} ${t.action} ${t.lot_size} lot @ ${t.entry_price} (now ${prices[t.pair]?.toFixed(PAIRS[t.pair].decimals)}, PnL: $${computePnL(t, prices[t.pair]).toFixed(2)})`).join('\n')
           : '(no open positions)';
 
-        // Build user prompt for AI
-        const userPrompt = `Current forex prices:\n${pricesTxt}\n\nLatest news:\n${newsTxt}\n\nYour current open positions:\n${openTxt}\n\nYour balance: $${trader.balance.toFixed(2)}, Equity: $${equity.toFixed(2)}\n\nDecide your next action. Reply ONLY in JSON: {"action":"BUY|SELL|CLOSE|HOLD","reasoning":"why","confidence":0-100,"pair":"EUR/USD"}\n\nIf BUY/SELL: which pair from your preferred list (${trader.preferred_pairs.join(', ')})?\nIf CLOSE: which open position to close (specify pair)?`;
+        const userPrompt = `Current forex prices:\n${pricesTxt}\n\nLatest news:\n${newsTxt}\n\nYour current open positions:\n${openTxt}\n\nYour balance: $${parseFloat(trader.balance).toFixed(2)}, Equity: $${equity.toFixed(2)}\n\nDecide your next action. Reply ONLY in JSON: {"action":"BUY|SELL|CLOSE|HOLD","reasoning":"why","confidence":0-100,"pair":"EUR/USD"}\n\nIf BUY/SELL: choose pair from (${trader.preferred_pairs.join(', ')}).\nIf CLOSE: specify which pair to close.`;
 
-        const responseText = await callAI(trader.ai_provider, trader.ai_model, trader.system_prompt, userPrompt);
+        let responseText;
+        try {
+          responseText = await callAI(trader.ai_provider, trader.ai_model, trader.system_prompt, userPrompt);
+        } catch (aiErr) {
+          log.push({ trader: trader.name, status: 'ai_error', error: aiErr.message.slice(0, 200) });
+          continue;
+        }
+
         const decision = parseAIDecision(responseText);
-
         if (!decision) {
           log.push({ trader: trader.name, status: 'invalid_response', raw: responseText?.slice(0, 200) });
           continue;
         }
 
-        // Try parse pair from response
-        let pair = null;
-        try {
-          const obj = JSON.parse(responseText.match(/\{[\s\S]*\}/)?.[0] || '{}');
-          pair = obj.pair;
-        } catch {}
+        const pair = decision.pair;
 
         // === HANDLE CLOSE ===
         if (decision.action === 'CLOSE' && myOpen.length > 0) {
-          // Find which position to close
           const target = pair
             ? myOpen.find(t => t.pair === pair)
-            : myOpen[0]; // close first if not specified
+            : myOpen[0];
           if (target) {
             const pnl = computePnL(target, prices[target.pair]);
             await sb.from('trades').update({
@@ -123,13 +142,12 @@ export default async function handler(req, res) {
             }).eq('id', trader.id);
 
             log.push({ trader: trader.name, action: 'CLOSE', pair: target.pair, pnl: pnl.toFixed(2), reason: decision.reasoning });
-            continue;
+          } else {
+            log.push({ trader: trader.name, status: 'close_no_match' });
           }
         }
-
-        // === HANDLE BUY / SELL ===
-        if ((decision.action === 'BUY' || decision.action === 'SELL') && myOpen.length < 3) {
-          // Pick pair (validate it's in preferred_pairs and not already occupied)
+        // === HANDLE BUY/SELL ===
+        else if ((decision.action === 'BUY' || decision.action === 'SELL') && myOpen.length < 3) {
           const occupied = myOpen.map(t => t.pair);
           let chosenPair = pair && trader.preferred_pairs.includes(pair) && !occupied.includes(pair)
             ? pair
@@ -139,12 +157,11 @@ export default async function handler(req, res) {
             continue;
           }
 
-          // Lot size based on trader risk profile
           const lotByTrader = { 1: 0.15, 2: 0.05, 3: 0.10, 4: 0.12, 5: 0.40 };
           const lot = lotByTrader[trader.id] || 0.1;
 
           const newsContext = trader.id === 3
-            ? news.filter(n => n.affected_pairs.includes(chosenPair)).slice(0,2).map(n => n.title).join(' | ')
+            ? news.filter(n => (n.affected_pairs || []).includes(chosenPair)).slice(0,2).map(n => n.title).join(' | ')
             : null;
 
           await sb.from('trades').insert({
@@ -163,29 +180,34 @@ export default async function handler(req, res) {
           log.push({ trader: trader.name, action: 'HOLD', reason: decision.reasoning });
         }
 
-        // Record equity snapshot
-        const newOpenTrades = await sb.from('trades').select('*').eq('trader_id', trader.id).eq('status', 'OPEN');
-        const newOpenPnL = (newOpenTrades.data || []).reduce((s, t) => s + computePnL(t, prices[t.pair] || t.entry_price), 0);
-        const { data: updatedTrader } = await sb.from('traders').select('balance').eq('id', trader.id).single();
-        const newEquity = parseFloat(updatedTrader.balance) + newOpenPnL;
-        await sb.from('equity_snapshots').insert({
-          trader_id: trader.id,
-          equity: newEquity
-        });
-
+        // === Record equity snapshot ===
+        try {
+          const { data: newOpenTrades } = await sb.from('trades').select('*').eq('trader_id', trader.id).eq('status', 'OPEN');
+          const newOpenPnL = (newOpenTrades || []).reduce((s, t) => s + computePnL(t, prices[t.pair] || t.entry_price), 0);
+          const { data: updatedTrader } = await sb.from('traders').select('balance').eq('id', trader.id).single();
+          const newEquity = parseFloat(updatedTrader.balance) + newOpenPnL;
+          await sb.from('equity_snapshots').insert({ trader_id: trader.id, equity: newEquity });
+        } catch (snapErr) {
+          console.warn('Snapshot error for', trader.name, ':', snapErr.message);
+        }
       } catch (traderErr) {
-        log.push({ trader: trader.name, status: 'error', error: traderErr.message });
+        log.push({ trader: trader.name, status: 'error', error: traderErr.message.slice(0, 200) });
       }
     }
 
     return res.status(200).json({
       ok: true,
       cycle_at: new Date().toISOString(),
+      duration_ms: Date.now() - startTime,
       prices,
       log
     });
   } catch (err) {
-    console.error('run-cycle error:', err);
-    return res.status(500).json({ error: err.message, stack: err.stack });
+    console.error('run-cycle fatal error:', err);
+    return res.status(500).json({
+      error: err.message,
+      where: 'run-cycle handler',
+      duration_ms: Date.now() - startTime
+    });
   }
 }
