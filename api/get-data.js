@@ -9,6 +9,7 @@ let priceCache = { prices: null, timestamp: 0 };
 
 async function getPricesWithCache() {
   const now = Date.now();
+  // Use cache if fresh (within 60s)
   if (priceCache.prices && now - priceCache.timestamp < 60_000) {
     return priceCache.prices;
   }
@@ -17,12 +18,14 @@ async function getPricesWithCache() {
     priceCache = { prices, timestamp: now };
     return prices;
   } catch (err) {
-    // fallback: return last known prices, or defaults
-    if (priceCache.prices) return priceCache.prices;
-    return {
-      'EUR/USD': 1.085, 'GBP/USD': 1.263, 'USD/JPY': 149.82,
-      'AUD/USD': 0.658, 'USD/CAD': 1.357, 'EUR/JPY': 162.53
-    };
+    // If fetch fails, return cached (even if old) — better than fake fallback
+    if (priceCache.prices) {
+      console.warn('Using stale cache (fetch failed):', err.message);
+      return priceCache.prices;
+    }
+    // No cache at all — return empty so frontend shows "..."
+    console.warn('No prices available:', err.message);
+    return {};
   }
 }
 
@@ -48,10 +51,13 @@ export default async function handler(req, res) {
     const snapshots = snapshotsRes.data || [];
     const news = newsRes.data || [];
 
-    // Compute equity per trader (balance + open PnL)
+    // Helper: get price for pair, fallback to trade's entry price if no price available
+    const getPriceFor = (pair, entry) => prices[pair] || parseFloat(entry);
+
+    // Compute equity per trader (balance + open PnL using REAL prices when available)
     const enrichedTraders = traders.map(t => {
       const myOpen = openTrades.filter(o => o.trader_id === t.id);
-      const openPnL = myOpen.reduce((sum, tr) => sum + computePnL(tr, prices[tr.pair] || tr.entry_price), 0);
+      const openPnL = myOpen.reduce((sum, tr) => sum + computePnL(tr, getPriceFor(tr.pair, tr.entry_price)), 0);
       const equity = parseFloat(t.balance) + openPnL;
       const totalTrades = t.wins + t.losses;
       const winRate = totalTrades > 0 ? (t.wins / totalTrades * 100) : 0;
@@ -67,11 +73,14 @@ export default async function handler(req, res) {
     });
 
     // Enrich open trades with current price & live PnL
-    const enrichedOpen = openTrades.map(t => ({
-      ...t,
-      current_price: prices[t.pair] || t.entry_price,
-      live_pnl: computePnL(t, prices[t.pair] || t.entry_price)
-    }));
+    const enrichedOpen = openTrades.map(t => {
+      const currentPrice = getPriceFor(t.pair, t.entry_price);
+      return {
+        ...t,
+        current_price: currentPrice,
+        live_pnl: computePnL(t, currentPrice)
+      };
+    });
 
     // Group snapshots by trader
     const equityByTrader = {};
@@ -90,6 +99,7 @@ export default async function handler(req, res) {
       news,
       prices,
       pairs: Object.keys(PAIRS),
+      prices_available: Object.keys(prices).length > 0,
       timestamp: new Date().toISOString()
     });
   } catch (err) {

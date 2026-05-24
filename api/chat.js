@@ -19,6 +19,27 @@ async function getPricesWithCache() {
   }
 }
 
+// Strip JSON wrapper if AI accidentally returns JSON
+function extractText(raw) {
+  if (!raw) return '';
+  let s = String(raw).trim();
+  // remove markdown code fence
+  s = s.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+  // If looks like JSON, try to extract meaningful text from common fields
+  if (s.startsWith('{')) {
+    try {
+      const obj = JSON.parse(s);
+      // try common reply fields
+      return obj.reply || obj.response || obj.text || obj.message || obj.greeting ||
+             obj.answer || Object.values(obj).filter(v => typeof v === 'string').join(' ') ||
+             s;
+    } catch {
+      // not valid JSON, return as is
+    }
+  }
+  return s;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -41,21 +62,27 @@ export default async function handler(req, res) {
     const totalTrades = trader.wins + trader.losses;
     const winRate = totalTrades > 0 ? (trader.wins / totalTrades * 100).toFixed(0) : 0;
 
-    const contextLine = `[Your stats: equity $${equity.toFixed(2)} (${((equity-10000)/100).toFixed(2)}% return), ${totalTrades} trades, ${winRate}% win rate, ${openTrades?.length || 0} open positions]`;
+    const contextLine = `Konteks kamu saat ini: equity $${equity.toFixed(2)} (return ${((equity-10000)/100).toFixed(2)}%), ${totalTrades} trade selesai, ${winRate}% win rate, ${openTrades?.length || 0} posisi terbuka.`;
 
-    const userPrompt = `${contextLine}\n\nUser asks: "${message}"\n\nReply in a casual conversational way (NOT JSON), max 2 sentences, in Bahasa Indonesia. Stay in character as ${trader.name}.`;
+    // IMPORTANT: Different system prompt for CHAT (no JSON formatting)
+    const chatSystemPrompt = `${trader.system_prompt.replace(/Respond in JSON.*$/i, '').trim()}
 
-    // Use a chat-friendly system prompt (drop JSON formatting requirement)
-    const chatSystemPrompt = trader.system_prompt
-      .replace(/Respond in JSON.*$/i, '')
-      .trim() + `\n\nWhen chatting with users, respond conversationally (no JSON), max 2 sentences, in Bahasa Indonesia.`;
+PENTING UNTUK CHAT:
+- Jawab dalam Bahasa Indonesia
+- JANGAN gunakan format JSON
+- Jawab maksimal 2 kalimat dalam teks biasa
+- Tetap dalam karakter ${trader.name}
+- Jangan kasih tanda kurung kurawal, langsung teks saja`;
 
-    const reply = await callAI(trader.ai_provider, trader.ai_model, chatSystemPrompt, userPrompt);
+    const userPrompt = `${contextLine}\n\nUser bertanya: "${message}"\n\nJawab langsung dalam teks biasa (BUKAN JSON), maksimal 2 kalimat:`;
+
+    const rawReply = await callAI(trader.ai_provider, trader.ai_model, chatSystemPrompt, userPrompt);
+    const cleanReply = extractText(rawReply);
 
     return res.status(200).json({
       trader: trader.name,
       emoji: trader.emoji,
-      reply: reply.trim()
+      reply: cleanReply
     });
   } catch (err) {
     console.error('chat error:', err);

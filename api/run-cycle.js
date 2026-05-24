@@ -47,22 +47,30 @@ export default async function handler(req, res) {
   try {
     const sb = getSupabase();
 
-    // === STEP 1: Fetch forex prices (with detailed error) ===
+    // === STEP 1: Fetch forex prices ===
+    // CRITICAL: If TwelveData fails (rate limit), we MUST refuse to trade
+    // Otherwise we'd use fake fallback prices that diverge from reality
     let prices;
     try {
       prices = await fetchForexPrices();
+      // Sanity check: ensure all required pairs have realistic prices
+      const required = Object.keys(PAIRS);
+      const missing = required.filter(p => !prices[p] || prices[p] <= 0);
+      if (missing.length > 0) {
+        throw new Error(`Missing prices for: ${missing.join(', ')}`);
+      }
     } catch (fetchErr) {
-      console.error('fetchForexPrices failed:', fetchErr);
-      // Use fallback prices instead of failing entire cycle
-      console.warn('Using fallback prices');
-      prices = {
-        'EUR/USD': 1.085, 'GBP/USD': 1.263, 'USD/JPY': 149.82,
-        'AUD/USD': 0.658, 'USD/CAD': 1.357, 'EUR/JPY': 162.53
-      };
-    }
-
-    if (!prices || Object.keys(prices).length === 0) {
-      return res.status(500).json({ error: 'Could not get any forex prices' });
+      console.error('fetchForexPrices failed:', fetchErr.message);
+      // CRITICAL FIX: Return error instead of trading with fake prices
+      // This prevents trades being opened at fake prices that won't match
+      // the real prices shown on the UI
+      return res.status(200).json({
+        ok: false,
+        skipped: true,
+        reason: 'Could not fetch real forex prices (likely rate limited)',
+        error: fetchErr.message,
+        cycle_at: new Date().toISOString()
+      });
     }
 
     // === STEP 2: Refresh news ===
@@ -73,7 +81,6 @@ export default async function handler(req, res) {
       } else {
         const { data } = await sb.from('news_cache').select('*').limit(10);
         news = data || [];
-        // If empty (first run), seed news
         if (news.length === 0) news = await refreshNews(sb);
       }
     } catch (newsErr) {
