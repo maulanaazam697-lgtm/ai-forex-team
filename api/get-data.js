@@ -1,40 +1,22 @@
 // ============================================
 // GET /api/get-data
-// Returns: traders, open trades, recent closed trades,
-//          equity history, latest prices
 // ============================================
 import { getSupabase, fetchForexPrices, computePnL, PAIRS } from './_lib.js';
-
-let priceCache = { prices: null, timestamp: 0 };
-
-async function getPricesWithCache() {
-  const now = Date.now();
-  // Use cache if fresh (within 60s)
-  if (priceCache.prices && now - priceCache.timestamp < 60_000) {
-    return priceCache.prices;
-  }
-  try {
-    const prices = await fetchForexPrices();
-    priceCache = { prices, timestamp: now };
-    return prices;
-  } catch (err) {
-    // If fetch fails, return cached (even if old) — better than fake fallback
-    if (priceCache.prices) {
-      console.warn('Using stale cache (fetch failed):', err.message);
-      return priceCache.prices;
-    }
-    // No cache at all — return empty so frontend shows "..."
-    console.warn('No prices available:', err.message);
-    return {};
-  }
-}
 
 export default async function handler(req, res) {
   try {
     const sb = getSupabase();
-    const prices = await getPricesWithCache();
 
-    // Fetch all data in parallel
+    // Get prices (uses global cache automatically)
+    let prices = {};
+    try {
+      prices = await fetchForexPrices();
+    } catch (err) {
+      console.warn('Price fetch failed in get-data:', err.message);
+      // Don't fail entire request — return empty prices
+      prices = {};
+    }
+
     const [tradersRes, openTradesRes, closedTradesRes, snapshotsRes, newsRes] = await Promise.all([
       sb.from('traders').select('*').order('id'),
       sb.from('trades').select('*').eq('status', 'OPEN').order('opened_at', { ascending: false }),
@@ -51,10 +33,9 @@ export default async function handler(req, res) {
     const snapshots = snapshotsRes.data || [];
     const news = newsRes.data || [];
 
-    // Helper: get price for pair, fallback to trade's entry price if no price available
+    // Use entry_price as fallback if no current price available
     const getPriceFor = (pair, entry) => prices[pair] || parseFloat(entry);
 
-    // Compute equity per trader (balance + open PnL using REAL prices when available)
     const enrichedTraders = traders.map(t => {
       const myOpen = openTrades.filter(o => o.trader_id === t.id);
       const openPnL = myOpen.reduce((sum, tr) => sum + computePnL(tr, getPriceFor(tr.pair, tr.entry_price)), 0);
@@ -72,7 +53,6 @@ export default async function handler(req, res) {
       };
     });
 
-    // Enrich open trades with current price & live PnL
     const enrichedOpen = openTrades.map(t => {
       const currentPrice = getPriceFor(t.pair, t.entry_price);
       return {
@@ -82,13 +62,11 @@ export default async function handler(req, res) {
       };
     });
 
-    // Group snapshots by trader
     const equityByTrader = {};
     for (const s of snapshots) {
       if (!equityByTrader[s.trader_id]) equityByTrader[s.trader_id] = [];
       equityByTrader[s.trader_id].push({ equity: parseFloat(s.equity), at: s.recorded_at });
     }
-    // reverse so chronological (oldest first)
     for (const id in equityByTrader) equityByTrader[id].reverse();
 
     return res.status(200).json({

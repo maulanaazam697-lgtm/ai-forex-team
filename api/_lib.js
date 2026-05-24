@@ -21,8 +21,21 @@ export const PAIRS = {
   'EUR/JPY': { decimals: 3, pip: 0.01 }
 };
 
-// === FETCH FOREX PRICE FROM TWELVEDATA (robust + fallback) ===
-export async function fetchForexPrices() {
+// === GLOBAL FOREX PRICE CACHE (shared across endpoints in same instance) ===
+// Note: serverless instances don't share memory globally, but within
+// the same function invocation chain this helps avoid double-fetch
+let _priceCache = { prices: null, timestamp: 0 };
+const CACHE_TTL_MS = 90_000; // 90 seconds — important to avoid TwelveData rate limit
+
+// === FETCH FOREX PRICE FROM TWELVEDATA (with cache) ===
+export async function fetchForexPrices(forceFresh = false) {
+  const now = Date.now();
+
+  // Use cache if fresh and not forcing fresh fetch
+  if (!forceFresh && _priceCache.prices && (now - _priceCache.timestamp) < CACHE_TTL_MS) {
+    return _priceCache.prices;
+  }
+
   const key = process.env.TWELVEDATA_API_KEY;
   if (!key) throw new Error('Missing TwelveData API key');
 
@@ -34,19 +47,32 @@ export async function fetchForexPrices() {
     const res = await fetch(url);
     data = await res.json();
   } catch (err) {
+    // If network error and we have cached prices, use them
+    if (_priceCache.prices) {
+      console.warn('Network error, using cached prices:', err.message);
+      return _priceCache.prices;
+    }
     throw new Error('Network error to TwelveData: ' + err.message);
   }
 
   // Check for API error (rate limit, invalid key, etc)
   if (data.code && data.code !== 200) {
+    // If rate limited and we have cached prices, use them
+    if (data.code === 429 && _priceCache.prices) {
+      console.warn('Rate limited, using cached prices');
+      return _priceCache.prices;
+    }
     throw new Error(`TwelveData error ${data.code}: ${data.message || 'unknown'}`);
   }
   if (data.status === 'error') {
+    if (_priceCache.prices) {
+      console.warn('TwelveData error, using cached prices');
+      return _priceCache.prices;
+    }
     throw new Error(`TwelveData: ${data.message || 'unknown error'}`);
   }
 
-  // Parse response — multi-symbol returns { "EUR/USD": {"price":"..."} }
-  //                  single symbol returns { "price":"..." }
+  // Parse response
   const prices = {};
   for (const sym of Object.keys(PAIRS)) {
     if (data[sym] && data[sym].price) {
@@ -54,32 +80,22 @@ export async function fetchForexPrices() {
     }
   }
 
-  // Fallback for single-symbol response shape
-  if (Object.keys(prices).length === 0 && data.price) {
-    // shouldn't happen with multi-symbol, but just in case
-    const firstPair = Object.keys(PAIRS)[0];
-    prices[firstPair] = parseFloat(data.price);
-  }
-
-  // If still empty, return fallback static prices (so app doesn't break)
   if (Object.keys(prices).length === 0) {
-    console.warn('TwelveData returned no prices, using fallback');
-    return {
-      'EUR/USD': 1.085, 'GBP/USD': 1.263, 'USD/JPY': 149.82,
-      'AUD/USD': 0.658, 'USD/CAD': 1.357, 'EUR/JPY': 162.53
-    };
+    if (_priceCache.prices) return _priceCache.prices;
+    throw new Error('TwelveData returned no parseable prices');
   }
 
-  // Fill in missing pairs with fallback
-  const fallback = {
-    'EUR/USD': 1.085, 'GBP/USD': 1.263, 'USD/JPY': 149.82,
-    'AUD/USD': 0.658, 'USD/CAD': 1.357, 'EUR/JPY': 162.53
-  };
-  for (const sym of Object.keys(PAIRS)) {
-    if (!prices[sym]) prices[sym] = fallback[sym];
-  }
-
+  // Save to cache
+  _priceCache = { prices, timestamp: now };
   return prices;
+}
+
+// Export cache info for debugging
+export function getCacheInfo() {
+  return {
+    has_cache: !!_priceCache.prices,
+    age_seconds: _priceCache.prices ? Math.round((Date.now() - _priceCache.timestamp) / 1000) : null
+  };
 }
 
 // === COMPUTE PNL FROM OPEN POSITION ===
