@@ -3,15 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AI Forex Trading Team — Multi-Pair Live Simulator</title>
+<title>AI Forex Trading Team — REAL AI</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #e2e8f0;
-    min-height: 100vh;
-    padding: 12px;
+    color: #e2e8f0; min-height: 100vh; padding: 12px;
     transition: background 0.3s;
   }
   body.light {
@@ -24,22 +22,17 @@
   body.light .live-trade, body.light .history-item, body.light .news-item, body.light .pair-card { background: rgba(241, 245, 249, 0.6); }
   body.light .stat-box, body.light .history-reason, body.light .chat-bubble.ai { background: rgba(226, 232, 240, 0.8); }
   body.light .card-title, body.light .trader-name, body.light .news-title { color: #0f172a; }
-  body.light .position-row { border-color: #cbd5e1; }
 
   .container { max-width: 1400px; margin: 0 auto; }
 
-  /* HEADER */
   header {
     background: rgba(15, 23, 42, 0.8);
     border: 1px solid #334155;
     border-radius: 16px;
     padding: 16px 20px;
     margin-bottom: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 12px;
   }
   .logo { font-size: 20px; font-weight: 800; }
   .logo span { color: #38bdf8; }
@@ -48,12 +41,11 @@
     background: rgba(34, 197, 94, 0.15); color: #4ade80;
     padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
   }
-  .live-badge.paused { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+  .live-badge.error { background: rgba(239, 68, 68, 0.15); color: #f87171; }
   .pulse {
     width: 8px; height: 8px; background: #4ade80;
     border-radius: 50%; animation: pulse 1.5s infinite;
   }
-  .paused .pulse { background: #fbbf24; animation: none; }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.3); }
@@ -64,18 +56,13 @@
   .market-item .value { font-weight: 700; font-size: 15px; }
   .icon-btn {
     background: rgba(30, 41, 59, 0.6);
-    border: 1px solid #334155;
-    color: inherit;
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    transition: all 0.2s;
+    border: 1px solid #334155; color: inherit;
+    width: 36px; height: 36px; border-radius: 10px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; transition: all 0.2s;
   }
   .icon-btn:hover { border-color: #38bdf8; transform: translateY(-1px); }
 
-  /* GRID */
   .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
   @media (min-width: 1024px) {
     .grid { grid-template-columns: 1fr 1fr; }
@@ -91,11 +78,10 @@
   .card-title {
     font-size: 14px; font-weight: 700; margin-bottom: 12px;
     color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 8px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
   }
 
-  /* MULTI-PAIR PRICES */
+  /* PAIRS GRID */
   .pairs-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -108,24 +94,17 @@
     border: 1px solid #334155;
     border-radius: 10px;
     padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
   }
-  .pair-card:hover { border-color: #38bdf8; transform: translateY(-1px); }
-  .pair-card.active { border-color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
   .pair-symbol { font-size: 11px; font-weight: 700; color: #94a3b8; }
-  .pair-price { font-size: 14px; font-weight: 800; font-family: 'Courier New', monospace; margin-top: 2px; transition: color 0.3s; }
-  .pair-change { font-size: 10px; margin-top: 2px; }
+  .pair-price { font-size: 14px; font-weight: 800; font-family: 'Courier New', monospace; margin-top: 2px; }
 
-  /* LEADERBOARD */
+  /* TRADERS */
   .trader-card {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid #334155;
     border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 12px; margin-bottom: 10px;
+    cursor: pointer; transition: all 0.2s;
   }
   .trader-card:hover { border-color: #38bdf8; transform: translateY(-2px); }
   .trader-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
@@ -138,6 +117,7 @@
   .trader-name { font-weight: 700; font-size: 14px; }
   .trader-style { font-size: 11px; color: #94a3b8; }
   .trader-pairs { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .trader-ai { font-size: 10px; color: #38bdf8; font-weight: 600; margin-top: 2px; }
   .trader-stats {
     display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 11px;
   }
@@ -147,21 +127,15 @@
   .profit-positive { color: #4ade80; }
   .profit-negative { color: #f87171; }
 
-  /* LIVE TRADES */
+  /* LIVE TRADES (open positions) */
   .live-trade {
     background: rgba(15, 23, 42, 0.6);
     border-left: 3px solid #38bdf8;
     padding: 10px 12px; margin-bottom: 8px;
     border-radius: 6px; font-size: 12px;
-    animation: slideIn 0.4s ease-out;
-  }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
   }
   .live-trade.buy { border-left-color: #4ade80; }
   .live-trade.sell { border-left-color: #f87171; }
-  .live-trade.close { border-left-color: #fbbf24; }
   .trade-head { display: flex; justify-content: space-between; margin-bottom: 4px; flex-wrap: wrap; gap: 4px; }
   .trade-action {
     font-weight: 700; font-size: 11px;
@@ -169,32 +143,13 @@
   }
   .action-BUY { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
   .action-SELL { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-  .action-CLOSE { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
   .pair-tag {
-    display: inline-block;
-    background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    margin-right: 4px;
+    display: inline-block; background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8; padding: 2px 6px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; margin-right: 4px;
     font-family: 'Courier New', monospace;
   }
   .trade-reason { color: #94a3b8; font-style: italic; margin-top: 4px; line-height: 1.4; }
-  body.light .trade-reason { color: #475569; }
-  .trade-time { color: #64748b; font-size: 10px; }
-
-  /* POSITIONS */
-  .position-row {
-    display: grid;
-    grid-template-columns: 1.3fr 70px 70px 70px 70px;
-    gap: 6px; padding: 8px;
-    border-bottom: 1px solid #334155;
-    font-size: 11px; align-items: center;
-  }
-  .position-row:last-child { border-bottom: none; }
-  .position-row.header { font-weight: 700; color: #94a3b8; font-size: 10px; text-transform: uppercase; }
 
   /* HISTORY */
   .history-list { max-height: 600px; overflow-y: auto; }
@@ -213,29 +168,11 @@
   }
   .history-pnl { font-weight: 700; }
   .history-details { display: flex; gap: 12px; color: #94a3b8; font-size: 11px; margin-bottom: 6px; flex-wrap: wrap; }
-  body.light .history-details { color: #64748b; }
   .history-reason {
     background: rgba(15, 23, 42, 0.6);
     padding: 6px 8px; border-radius: 6px;
-    font-size: 11px; color: #cbd5e1; font-style: italic; line-height: 1.4;
+    font-size: 11px; color: #cbd5e1; font-style: italic;
   }
-  body.light .history-reason { color: #334155; }
-
-  .news-tag {
-    display: inline-block; background: rgba(168, 85, 247, 0.15);
-    color: #c4b5fd; padding: 2px 6px; border-radius: 4px;
-    font-size: 10px; margin-right: 4px; margin-top: 4px; font-style: normal;
-  }
-
-  /* FILTERS */
-  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
-  .filter-bar select, .filter-bar input {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid #334155; color: inherit;
-    padding: 6px 10px; border-radius: 8px;
-    font-size: 12px; min-width: 100px;
-  }
-  body.light .filter-bar select, body.light .filter-bar input { background: rgba(255,255,255,0.8); }
 
   /* NEWS */
   .news-item { padding: 10px 0; border-bottom: 1px solid #334155; font-size: 12px; }
@@ -249,17 +186,6 @@
   .sent-bullish { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
   .sent-bearish { background: rgba(239, 68, 68, 0.2); color: #f87171; }
   .sent-neutral { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
-  .news-pair-tag {
-    display: inline-block;
-    background: rgba(56, 189, 248, 0.15);
-    color: #38bdf8;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 9px;
-    font-weight: 700;
-    margin-right: 4px;
-    font-family: monospace;
-  }
 
   .disclaimer {
     text-align: center; color: #64748b;
@@ -267,7 +193,6 @@
   }
 
   ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
 
   .empty-state {
@@ -275,33 +200,23 @@
     padding: 20px; font-size: 12px; font-style: italic;
   }
 
-  /* PRICE BIG */
-  .price-display { text-align: center; padding: 12px 0; }
-  .price-big {
-    font-size: 32px; font-weight: 800;
-    font-family: 'Courier New', monospace;
-    transition: color 0.3s;
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .filter-bar select, .filter-bar input {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #334155; color: inherit;
+    padding: 6px 10px; border-radius: 8px;
+    font-size: 12px; min-width: 100px;
   }
-  .price-change-big { font-size: 13px; margin-top: 4px; }
-  .mini-chart {
-    height: 60px; margin-top: 12px;
-    display: flex; align-items: flex-end;
-    gap: 2px; padding: 0 4px;
-  }
-  .chart-bar {
-    flex: 1;
-    background: linear-gradient(180deg, #38bdf8, #0284c7);
-    border-radius: 2px 2px 0 0;
-    min-height: 4px; transition: height 0.5s;
-  }
+  .btn { background: #38bdf8; color: #0f172a; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+  .btn.secondary { background: rgba(148, 163, 184, 0.2); color: inherit; }
+  .btn.danger { background: #ef4444; color: white; }
 
-  /* EQUITY */
-  .equity-chart-wrap { padding: 8px 0; }
+  /* EQUITY CHART */
+  .equity-svg { width: 100%; height: 220px; }
   .equity-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; font-size: 11px; }
   .legend-item { display: flex; align-items: center; gap: 4px; cursor: pointer; opacity: 0.9; }
   .legend-item.dimmed { opacity: 0.3; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .equity-svg { width: 100%; height: 220px; }
 
   /* MODAL */
   .modal-backdrop {
@@ -319,21 +234,11 @@
     max-width: 700px; width: 100%;
     max-height: 90vh; overflow-y: auto;
     padding: 20px;
-    animation: scaleIn 0.2s ease-out;
   }
-  body.light .modal { background: #f8fafc; border-color: #cbd5e1; }
-  @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-  }
+  body.light .modal { background: #f8fafc; }
   .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-  .modal-close {
-    background: none; border: none; color: inherit;
-    font-size: 24px; cursor: pointer; opacity: 0.7;
-  }
-  .modal-close:hover { opacity: 1; }
+  .modal-close { background: none; border: none; color: inherit; font-size: 24px; cursor: pointer; opacity: 0.7; }
 
-  /* CHAT */
   .chat-wrap { display: flex; flex-direction: column; height: 400px; }
   .chat-messages {
     flex: 1; overflow-y: auto;
@@ -341,68 +246,72 @@
     background: rgba(15, 23, 42, 0.4);
     border-radius: 10px;
   }
-  body.light .chat-messages { background: rgba(226, 232, 240, 0.4); }
   .chat-bubble {
     padding: 8px 12px; border-radius: 12px;
     margin-bottom: 8px; font-size: 13px;
     max-width: 85%; line-height: 1.4;
   }
-  .chat-bubble.user { background: #38bdf8; color: #0f172a; margin-left: auto; border-bottom-right-radius: 4px; }
-  .chat-bubble.ai { background: rgba(30, 41, 59, 0.8); border-bottom-left-radius: 4px; }
+  .chat-bubble.user { background: #38bdf8; color: #0f172a; margin-left: auto; }
+  .chat-bubble.ai { background: rgba(30, 41, 59, 0.8); }
+  .chat-bubble.loading { font-style: italic; opacity: 0.6; }
   .chat-input-row { display: flex; gap: 8px; }
   .chat-input {
     flex: 1;
     background: rgba(15, 23, 42, 0.6);
-    border: 1px solid #334155;
-    color: inherit;
-    padding: 10px 14px;
-    border-radius: 10px;
-    font-size: 13px;
+    border: 1px solid #334155; color: inherit;
+    padding: 10px 14px; border-radius: 10px; font-size: 13px;
   }
-  body.light .chat-input { background: rgba(255,255,255,0.8); }
   .chat-send {
     background: #38bdf8; color: #0f172a;
     border: none; padding: 10px 18px;
-    border-radius: 10px; font-weight: 700;
-    cursor: pointer; font-size: 13px;
+    border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px;
   }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* SETTINGS */
-  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #334155; }
-  .settings-row:last-child { border-bottom: none; }
-  .settings-label { font-size: 13px; font-weight: 600; }
-  .settings-desc { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-  .btn { background: #38bdf8; color: #0f172a; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
-  .btn.danger { background: #ef4444; color: white; }
-  .btn.secondary { background: rgba(148, 163, 184, 0.2); color: inherit; }
-  .speed-buttons { display: flex; gap: 4px; }
-  .speed-btn {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid #334155; color: inherit;
-    padding: 6px 10px; border-radius: 6px;
-    font-size: 12px; cursor: pointer;
-  }
-  .speed-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-
-  /* TRADER DETAIL */
-  .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #334155; }
   .detail-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
   @media (max-width: 600px) { .detail-stats { grid-template-columns: repeat(2, 1fr); } }
-  .detail-stat { background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 10px; text-align: center; }
-  body.light .detail-stat { background: rgba(226, 232, 240, 0.6); }
+  .detail-stat {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 10px; border-radius: 10px; text-align: center;
+  }
   .detail-stat-label { font-size: 10px; color: #94a3b8; text-transform: uppercase; }
   .detail-stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; }
-  .detail-section-title { font-size: 12px; font-weight: 700; margin: 16px 0 8px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+  .detail-section-title { font-size: 12px; font-weight: 700; margin: 16px 0 8px; color: #94a3b8; text-transform: uppercase; }
+
+  .refresh-btn {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid #38bdf8;
+    padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; font-size: 11px; font-weight: 600;
+  }
+  .refresh-btn:hover { background: rgba(56, 189, 248, 0.25); }
+  .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .run-cycle-btn {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white; border: none;
+    padding: 8px 16px; border-radius: 8px;
+    cursor: pointer; font-size: 12px; font-weight: 700;
+  }
+  .run-cycle-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .loading-spinner {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid #334155; border-top-color: #38bdf8;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- HEADER -->
   <header>
     <div>
-      <div class="logo">🤖 AI Forex Team <span>// Multi-Pair Simulator</span></div>
-      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">6 currency pairs • Tiap AI trade di pair berbeda sesuai strategi</div>
+      <div class="logo">🤖 AI Forex Team <span>// REAL AI Edition</span></div>
+      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Powered by Groq + Gemini + OpenRouter • Real forex from TwelveData • Stored in Supabase</div>
     </div>
     <div class="market-info">
       <div class="market-item">
@@ -410,88 +319,55 @@
         <div class="value"><span class="live-badge" id="live-badge"><span class="pulse"></span>LIVE</span></div>
       </div>
       <div class="market-item">
-        <div class="label">Cycle</div>
-        <div class="value" id="cycle-count">0</div>
+        <div class="label">Last update</div>
+        <div class="value" id="last-update" style="font-size: 11px;">-</div>
       </div>
-      <div class="market-item">
-        <div class="label">Open Pos</div>
-        <div class="value" id="total-open">0</div>
-      </div>
+      <button class="run-cycle-btn" id="run-cycle-btn" title="Trigger AI cycle manually">⚡ Run Cycle</button>
+      <button class="icon-btn" id="refresh-btn" title="Refresh data">🔄</button>
       <button class="icon-btn" id="theme-btn" title="Toggle theme">🌙</button>
-      <button class="icon-btn" id="settings-btn" title="Settings">⚙️</button>
     </div>
   </header>
 
   <div class="grid">
 
-    <!-- MULTI-PAIR PRICES -->
+    <!-- PAIRS -->
     <div class="card full-width">
-      <div class="card-title">💱 Live Forex Prices <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">klik pair untuk lihat chart</span></div>
-      <div class="pairs-grid" id="pairs-grid"></div>
-    </div>
-
-    <!-- SELECTED PAIR CHART -->
-    <div class="card full-width">
-      <div class="card-title">
-        <span>📈 <span id="selected-pair-label">EUR/USD</span> Chart</span>
-        <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">last 40 ticks</span>
+      <div class="card-title">💱 Live Forex Prices <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">from TwelveData • cached 60s</span></div>
+      <div class="pairs-grid" id="pairs-grid">
+        <div class="empty-state" style="grid-column: 1 / -1;">Loading prices...</div>
       </div>
-      <div class="price-display">
-        <div class="price-big" id="big-price">1.08542</div>
-        <div class="price-change-big" id="price-change">+0.0000 (+0.00%)</div>
-      </div>
-      <div class="mini-chart" id="mini-chart"></div>
     </div>
 
     <!-- EQUITY CURVE -->
     <div class="card full-width">
-      <div class="card-title">📊 Equity Curve — Performa Tiap AI <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">Modal awal: $10,000</span></div>
-      <div class="equity-chart-wrap">
-        <div class="equity-legend" id="equity-legend"></div>
-        <svg class="equity-svg" id="equity-svg" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
-      </div>
+      <div class="card-title">📊 Equity Curve <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">history dari Supabase</span></div>
+      <div class="equity-legend" id="equity-legend"></div>
+      <svg class="equity-svg" id="equity-svg" viewBox="0 0 800 220" preserveAspectRatio="none"></svg>
     </div>
 
     <!-- LEADERBOARD -->
     <div class="card">
-      <div class="card-title">🏆 Tim AI Trader <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">klik untuk detail</span></div>
-      <div id="leaderboard"></div>
-    </div>
-
-    <!-- LIVE TRADES -->
-    <div class="card">
-      <div class="card-title">⚡ Live Trades Stream</div>
-      <div id="live-trades" style="max-height: 600px; overflow-y: auto;">
-        <div class="empty-state">Menunggu trade pertama...</div>
-      </div>
+      <div class="card-title">🏆 Tim AI Trader <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">klik untuk chat</span></div>
+      <div id="leaderboard"><div class="empty-state">Loading...</div></div>
     </div>
 
     <!-- OPEN POSITIONS -->
-    <div class="card full-width">
-      <div class="card-title">📌 Semua Posisi Terbuka <span id="open-count" style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">0 posisi</span></div>
-      <div id="open-positions">
-        <div class="position-row header">
-          <div>Trader / Pair</div>
-          <div>Aksi</div>
-          <div>Entry</div>
-          <div>Now</div>
-          <div>P/L</div>
-        </div>
-        <div id="positions-body">
-          <div class="empty-state">Belum ada posisi terbuka</div>
-        </div>
+    <div class="card">
+      <div class="card-title">📌 Posisi Terbuka <span id="open-count" style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">0</span></div>
+      <div id="open-positions" style="max-height: 580px; overflow-y: auto;">
+        <div class="empty-state">Belum ada posisi terbuka</div>
       </div>
     </div>
 
     <!-- NEWS -->
     <div class="card full-width">
-      <div class="card-title">📰 Latest Forex News <span style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">berita ekonomi global</span></div>
-      <div id="news-list"></div>
+      <div class="card-title">📰 Latest Forex News</div>
+      <div id="news-list"><div class="empty-state">Loading...</div></div>
     </div>
 
     <!-- HISTORY -->
     <div class="card full-width">
-      <div class="card-title">📜 History Semua Trade <span id="history-count" style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">0 trade</span></div>
+      <div class="card-title">📜 History Trade <span id="history-count" style="font-size:10px; color:#64748b; text-transform:none; letter-spacing:0;">0 trade</span></div>
       <div class="filter-bar">
         <select id="filter-trader"><option value="all">Semua Trader</option></select>
         <select id="filter-pair"><option value="all">Semua Pair</option></select>
@@ -505,7 +381,6 @@
           <option value="profit">Profit only</option>
           <option value="loss">Loss only</option>
         </select>
-        <input type="text" id="filter-search" placeholder="🔍 Cari alasan..." />
         <button class="btn secondary" id="filter-clear">Reset</button>
       </div>
       <div class="history-list" id="history-list">
@@ -516,8 +391,8 @@
   </div>
 
   <div class="disclaimer">
-    ⚠️ Demo dengan data simulasi acak. Bukan financial advice.<br>
-    Versi production akan terhubung ke data forex real-time (TwelveData) & AI sungguhan (Gemini/Groq).
+    ⚠️ Edukasi & simulasi dengan AI sungguhan. Bukan financial advice. Modal virtual $10,000/trader.<br>
+    AI: Groq Llama, Google Gemini, OpenRouter (DeepSeek/Llama 4) • Forex: TwelveData • DB: Supabase
   </div>
 </div>
 
@@ -535,7 +410,7 @@
 <div class="modal-backdrop" id="chat-modal">
   <div class="modal">
     <div class="modal-header">
-      <div style="font-size:18px; font-weight:800;" id="chat-title">💬 Chat with AI</div>
+      <div style="font-size:18px; font-weight:800;" id="chat-title">💬 Chat</div>
       <button class="modal-close" onclick="closeModal('chat-modal')">×</button>
     </div>
     <div class="chat-wrap">
@@ -546,541 +421,250 @@
       </div>
     </div>
     <div style="font-size:10px; color:#64748b; margin-top:8px; text-align:center;">
-      💡 Di demo: response simulasi. Di production: AI sungguhan.
-    </div>
-  </div>
-</div>
-
-<div class="modal-backdrop" id="settings-modal">
-  <div class="modal" style="max-width:500px;">
-    <div class="modal-header">
-      <div style="font-size:18px; font-weight:800;">⚙️ Settings</div>
-      <button class="modal-close" onclick="closeModal('settings-modal')">×</button>
-    </div>
-    <div class="settings-row">
-      <div>
-        <div class="settings-label">Status Simulasi</div>
-        <div class="settings-desc">Pause / Resume trading AI</div>
-      </div>
-      <button class="btn" id="pause-btn">⏸ Pause</button>
-    </div>
-    <div class="settings-row">
-      <div>
-        <div class="settings-label">Kecepatan Simulasi</div>
-        <div class="settings-desc">Seberapa sering AI ambil keputusan</div>
-      </div>
-      <div class="speed-buttons">
-        <button class="speed-btn" data-speed="10000">0.5x</button>
-        <button class="speed-btn active" data-speed="5000">1x</button>
-        <button class="speed-btn" data-speed="2500">2x</button>
-        <button class="speed-btn" data-speed="1000">5x</button>
-      </div>
-    </div>
-    <div class="settings-row">
-      <div>
-        <div class="settings-label">Reset Semua Data</div>
-        <div class="settings-desc">Hapus history, balance kembali $10,000</div>
-      </div>
-      <button class="btn danger" id="reset-btn">🗑 Reset</button>
+      💡 Respon dari AI sungguhan (Groq/Gemini/OpenRouter)
     </div>
   </div>
 </div>
 
 <script>
 // ============================================
-// MULTI-PAIR FOREX MARKET
-// ============================================
-const PAIRS = {
-  'EUR/USD': { price: 1.08542, decimals: 5, pip: 0.0001, color: '#38bdf8' },
-  'GBP/USD': { price: 1.26310, decimals: 5, pip: 0.0001, color: '#a855f7' },
-  'USD/JPY': { price: 149.820, decimals: 3, pip: 0.01,   color: '#ef4444' },
-  'AUD/USD': { price: 0.65840, decimals: 5, pip: 0.0001, color: '#10b981' },
-  'USD/CAD': { price: 1.35720, decimals: 5, pip: 0.0001, color: '#f59e0b' },
-  'EUR/JPY': { price: 162.530, decimals: 3, pip: 0.01,   color: '#ec4899' }
-};
-
-// Per-pair price history
-const PAIR_HISTORY = {};
-Object.keys(PAIRS).forEach(p => PAIR_HISTORY[p] = []);
-
-let selectedPair = 'EUR/USD';
-
-// ============================================
-// AI TRADERS — masing-masing punya preferred pairs
-// ============================================
-const TRADERS = [
-  {
-    id: 1, name: 'Aggressive Alex', emoji: '🦅', color: '#ef4444',
-    style: 'Scalping • High Risk',
-    preferredPairs: ['EUR/USD', 'GBP/USD', 'USD/JPY'], // suka pair major volatile
-    balance: 10000, openTrades: [], history: [], wins: 0, losses: 0, equityHistory: [10000]
-  },
-  {
-    id: 2, name: 'Cautious Carla', emoji: '🐢', color: '#10b981',
-    style: 'Swing • Low Risk',
-    preferredPairs: ['EUR/USD', 'AUD/USD'], // pair stabil aja
-    balance: 10000, openTrades: [], history: [], wins: 0, losses: 0, equityHistory: [10000]
-  },
-  {
-    id: 3, name: 'News Nina', emoji: '📰', color: '#a855f7',
-    style: 'Fundamental • News',
-    preferredPairs: ['EUR/USD', 'EUR/JPY', 'GBP/USD'], // EUR/GBP banyak news ECB/BOE
-    balance: 10000, openTrades: [], history: [], wins: 0, losses: 0, equityHistory: [10000]
-  },
-  {
-    id: 4, name: 'Quant Quincy', emoji: '🤖', color: '#3b82f6',
-    style: 'Technical • RSI/MA',
-    preferredPairs: ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'EUR/JPY'], // semua pair, ikut signal
-    balance: 10000, openTrades: [], history: [], wins: 0, losses: 0, equityHistory: [10000]
-  },
-  {
-    id: 5, name: 'YOLO Yuki', emoji: '🎰', color: '#f59e0b',
-    style: 'Contrarian • Very High',
-    preferredPairs: ['USD/JPY', 'EUR/JPY', 'GBP/USD'], // pair volatile aja
-    balance: 10000, openTrades: [], history: [], wins: 0, losses: 0, equityHistory: [10000]
-  }
-];
-
-// ============================================
-// REASONS per trader (varied by pair)
-// ============================================
-function buildReason(trader, pair, action) {
-  const reasonsByTrader = {
-    1: [
-      `Momentum bullish kuat di ${pair}, RSI breakout, scalp cepat!`,
-      `${pair} price action rejection di support, entry agresif.`,
-      `Volume spike di ${pair} + bullish engulfing, masuk sekarang!`,
-      `Resistance ${pair} pecah dengan momentum, ikut tren.`,
-      `Pullback ${pair} ke MA20, peluang scalping 15 pips.`
-    ],
-    2: [
-      `Konfirmasi 3 candle bullish di support ${pair}, baru entry.`,
-      `Risk/reward 1:3 terpenuhi di ${pair}, posisi konservatif.`,
-      `Trend daily ${pair} bullish, swing dengan SL ketat.`,
-      `${pair} pullback ke area diskon, entry sabar.`,
-      `Cluster fibo 61.8% ${pair} + support, kondisi ideal.`
-    ],
-    3: [
-      `${pair === 'EUR/USD' || pair === 'EUR/JPY' ? 'ECB hawkish, EUR strengthening' : 'Central bank statement bias, ' + pair + ' move expected'}.`,
-      `${pair === 'USD/JPY' ? 'BoJ intervention concern, USD/JPY watch carefully' : 'NFP data weaker, USD melemah, sentiment shift ' + pair}.`,
-      `${pair === 'GBP/USD' ? 'BoE rate decision pending, GBP volatile' : 'Fed dovish, dollar weakening, ' + pair + ' play'}.`,
-      `Geopolitical risk reda, risk-on sentiment, posisi di ${pair}.`,
-      `Inflation data baru rilis, narrative berubah untuk ${pair}.`
-    ],
-    4: [
-      `${pair}: RSI(14)=28 oversold + MACD bullish cross, BUY signal.`,
-      `${pair}: MA50 cross MA200 (golden cross), trend confirm.`,
-      `${pair}: Stochastic exit oversold, momentum reversal.`,
-      `${pair}: Bollinger Band squeeze + breakout up.`,
-      `${pair}: ADX>25 trending, ikut arah MA50.`
-    ],
-    5: [
-      `Semua orang ${action === 'BUY' ? 'bearish' : 'bullish'} di ${pair}, gue lawan! YOLO 🚀`,
-      `${pair} feeling lucky, gas pol full lot!`,
-      `${pair} to the moon! 💎🙌`,
-      `Contrarian play di ${pair}, sentiment overbought, ${action} hard.`,
-      `${pair} no risk no story, all-in!`
-    ]
-  };
-  const arr = reasonsByTrader[trader.id];
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-
-// ============================================
-// NEWS POOL (with affected pairs)
-// ============================================
-const NEWS_POOL = [
-  { title: "ECB hints at potential rate cut in Q3 amid slowing inflation", sentiment: 'bearish', source: 'Reuters', pairs: ['EUR/USD','EUR/JPY'] },
-  { title: "US NFP beats expectations: 250K jobs added, dollar strengthens", sentiment: 'bullish', source: 'Bloomberg', pairs: ['EUR/USD','GBP/USD','AUD/USD','USD/JPY','USD/CAD'] },
-  { title: "Eurozone PMI rises to 52.3, manufacturing recovery signals", sentiment: 'bullish', source: 'FT', pairs: ['EUR/USD','EUR/JPY'] },
-  { title: "Fed Chair Powell: 'Patient approach' to rate decisions", sentiment: 'neutral', source: 'CNBC', pairs: ['EUR/USD','USD/JPY'] },
-  { title: "BoJ unlikely to hike rates this quarter, JPY remains weak", sentiment: 'bearish', source: 'Nikkei', pairs: ['USD/JPY','EUR/JPY'] },
-  { title: "BoE keeps rates unchanged, GBP volatility spikes", sentiment: 'neutral', source: 'BBC', pairs: ['GBP/USD'] },
-  { title: "Geopolitical tensions push safe-haven demand for USD", sentiment: 'bullish', source: 'Reuters', pairs: ['EUR/USD','GBP/USD','AUD/USD'] },
-  { title: "US CPI cools to 2.8%, market expects pause in hikes", sentiment: 'bearish', source: 'WSJ', pairs: ['EUR/USD','USD/JPY'] },
-  { title: "Lagarde: 'Inflation still too high, more action may be needed'", sentiment: 'bullish', source: 'ECB', pairs: ['EUR/USD','EUR/JPY'] },
-  { title: "Dollar index hits 3-month high on hawkish Fed minutes", sentiment: 'bullish', source: 'Bloomberg', pairs: ['EUR/USD','GBP/USD','AUD/USD','USD/CAD'] },
-  { title: "Australia jobs data disappoints, RBA dovish bets rise", sentiment: 'bearish', source: 'ABC', pairs: ['AUD/USD'] },
-  { title: "Canada oil exports surge, CAD strengthens", sentiment: 'bearish', source: 'CBC', pairs: ['USD/CAD'] }
-];
-
-const CHAT_RESPONSES = {
-  1: ["Bro, gue scalp di EUR/USD, GBP/USD, sama USD/JPY — pair major paling juicy!", "Gue suka volatilitas, jadi multi-pair biar ada peluang terus.", "Liat momentum dulu, kalau pair mana yang gerak gue masuk."],
-  2: ["Saya hanya di EUR/USD dan AUD/USD — pair stabil, lebih mudah dianalisa.", "Diversifikasi tapi terkontrol, tidak banyak pair sekaligus.", "Risk management penting, jadi pair-nya saya batasi."],
-  3: ["Saya fokus EUR/USD, EUR/JPY, GBP/USD karena banyak news ECB/BoE.", "Pair Euro paling sering ada katalis fundamental.", "Saya track sentiment per pair berdasarkan berita."],
-  4: ["Saya scan semua 6 pair, mana yang sinyal teknikal-nya valid saya ambil.", "Algoritma saya monitor RSI, MA, MACD di semua pair simultaneously.", "Multi-pair = lebih banyak opportunity, asal signal jelas."],
-  5: ["YOLO di pair volatile: USD/JPY, EUR/JPY, GBP/USD! 🚀", "Pair yang gerak gede aja yang bikin thrill!", "Diamond hands di pair JPY, bro! 💎"]
-};
-
-// ============================================
 // STATE
 // ============================================
-let cycleCount = 0;
-let liveTrades = [];
-let allHistory = [];
-let currentNews = [];
-let isPaused = false;
-let currentSpeed = 5000;
-let priceInterval = null;
-let cycleInterval = null;
-let visibleTraders = new Set([1,2,3,4,5]);
+const PAIRS_DECIMALS = {
+  'EUR/USD': 5, 'GBP/USD': 5, 'USD/JPY': 3,
+  'AUD/USD': 5, 'USD/CAD': 5, 'EUR/JPY': 3
+};
+let STATE = {
+  traders: [],
+  openTrades: [],
+  closedTrades: [],
+  equityHistory: {},
+  news: [],
+  prices: {},
+  visibleTraders: new Set([1,2,3,4,5])
+};
 
 // ============================================
-// MARKET TICK
+// API CALLS
 // ============================================
-function tickPrices() {
-  Object.keys(PAIRS).forEach(sym => {
-    const p = PAIRS[sym];
-    // volatility scaled to pip size
-    const vol = p.pip * 8;
-    const change = (Math.random() - 0.5) * vol;
-    p.price = p.price + change;
-    // soft bounds: don't let price drift too far
-    PAIR_HISTORY[sym].push(p.price);
-    if (PAIR_HISTORY[sym].length > 40) PAIR_HISTORY[sym].shift();
-  });
-}
-
-function getOpenPnL(trade) {
-  const pair = PAIRS[trade.pair];
-  const current = pair.price;
-  const diff = (current - trade.entry) * (trade.action === 'BUY' ? 1 : -1);
-  // Pip value sederhana: 1 lot standard = $10/pip for USD-quote pairs
-  // For JPY quote, pip value sedikit beda tapi kita sederhanakan
-  const pipValue = trade.pair.endsWith('JPY') ? 1000 : 10000;
-  return (diff / pair.pip) * trade.lot * (pair.pip * pipValue);
-}
-
-function getTotalOpenPnL(trader) {
-  return trader.openTrades.reduce((sum, t) => sum + getOpenPnL(t), 0);
-}
-
-function generateNews() {
-  if (Math.random() < 0.3 || currentNews.length === 0) {
-    currentNews = [];
-    const used = new Set();
-    while (currentNews.length < 4) {
-      const n = NEWS_POOL[Math.floor(Math.random()*NEWS_POOL.length)];
-      if (!used.has(n.title)) {
-        used.add(n.title);
-        currentNews.push({...n, time: new Date()});
-      }
-    }
+async function fetchData() {
+  try {
+    const res = await fetch('/api/get-data');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    STATE.traders = data.traders || [];
+    STATE.openTrades = data.open_trades || [];
+    STATE.closedTrades = data.closed_trades || [];
+    STATE.equityHistory = data.equity_history || {};
+    STATE.news = data.news || [];
+    STATE.prices = data.prices || {};
+    setStatus('LIVE');
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString('id-ID');
+    renderAll();
+  } catch (err) {
+    setStatus('ERROR', err.message);
+    console.error(err);
   }
 }
 
-// ============================================
-// AI DECISION (multi-pair)
-// ============================================
-function makeDecision(trader) {
-  // 1. Decide whether to close any existing positions
-  const closingTrades = [];
-  trader.openTrades = trader.openTrades.filter(t => {
-    const pnl = getOpenPnL(t);
-    const shouldClose = Math.abs(pnl) > 50 || Math.random() < 0.20;
-    if (shouldClose) {
-      trader.balance += pnl;
-      if (pnl > 0) trader.wins++; else trader.losses++;
-      const closed = {
-        ...t, exit: PAIRS[t.pair].price, pnl,
-        closedAt: new Date(), trader: trader
-      };
-      allHistory.unshift(closed);
-      trader.history.unshift(closed);
-      liveTrades.unshift({
-        type: 'CLOSE', trader, pair: t.pair, price: PAIRS[t.pair].price, pnl,
-        reason: `Close ${t.pair} ${t.action} → ${pnl >= 0 ? 'profit' : 'loss'} $${pnl.toFixed(2)}`,
-        time: new Date()
-      });
-      return false; // remove from openTrades
-    }
-    return true; // keep
-  });
+async function triggerCycle() {
+  const btn = document.getElementById('run-cycle-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span> Running...';
+  try {
+    const res = await fetch('/api/run-cycle', { method: 'POST' });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    console.log('Cycle log:', data.log);
+    btn.innerHTML = '✅ Done';
+    setTimeout(() => { btn.innerHTML = '⚡ Run Cycle'; btn.disabled = false; }, 2000);
+    await fetchData();
+  } catch (err) {
+    btn.innerHTML = '❌ Failed';
+    alert('Run cycle gagal: ' + err.message);
+    setTimeout(() => { btn.innerHTML = '⚡ Run Cycle'; btn.disabled = false; }, 2000);
+  }
+}
 
-  // 2. Decide whether to open new position(s)
-  // Limit max open per trader
-  const maxOpen = { 1: 3, 2: 2, 3: 3, 4: 4, 5: 2 }[trader.id];
-  if (trader.openTrades.length >= maxOpen) return;
-
-  const tradeChance = { 1: 0.45, 2: 0.15, 3: 0.30, 4: 0.30, 5: 0.50 }[trader.id];
-  if (Math.random() >= tradeChance) return;
-
-  // Pick a random pair from preferred pairs (avoid duplicate open positions on same pair)
-  const occupiedPairs = trader.openTrades.map(t => t.pair);
-  const available = trader.preferredPairs.filter(p => !occupiedPairs.includes(p));
-  if (available.length === 0) return;
-  const pair = available[Math.floor(Math.random()*available.length)];
-
-  const action = Math.random() < 0.5 ? 'BUY' : 'SELL';
-  const lot = trader.id === 5 ? (Math.random()*0.5 + 0.3).toFixed(2)
-            : trader.id === 2 ? (Math.random()*0.05 + 0.05).toFixed(2)
-            : (Math.random()*0.2 + 0.1).toFixed(2);
-  const reason = buildReason(trader, pair, action);
-  // News context: include news that affects this pair
-  const newsContext = trader.id === 3
-    ? currentNews.filter(n => n.pairs.includes(pair)).slice(0,2).map(n => n.title)
-    : [];
-
-  const newTrade = {
-    pair, action,
-    entry: PAIRS[pair].price,
-    lot: parseFloat(lot),
-    reason, newsContext,
-    openedAt: new Date(),
-    trader: trader
-  };
-  trader.openTrades.push(newTrade);
-  liveTrades.unshift({
-    type: action, trader, pair, price: PAIRS[pair].price,
-    lot: parseFloat(lot), reason, newsContext, time: new Date()
-  });
+function setStatus(status, msg) {
+  const badge = document.getElementById('live-badge');
+  if (status === 'LIVE') {
+    badge.classList.remove('error');
+    badge.innerHTML = '<span class="pulse"></span>LIVE';
+  } else if (status === 'ERROR') {
+    badge.classList.add('error');
+    badge.innerHTML = '⚠️ ERROR';
+    badge.title = msg || '';
+  }
 }
 
 // ============================================
 // RENDER
 // ============================================
 function renderPairs() {
-  const html = Object.keys(PAIRS).map(sym => {
-    const p = PAIRS[sym];
-    const hist = PAIR_HISTORY[sym];
-    const start = hist[0] || p.price;
-    const diff = p.price - start;
-    const pct = (diff / start * 100);
-    const cls = diff >= 0 ? 'profit-positive' : 'profit-negative';
-    const sign = diff >= 0 ? '+' : '';
-    const active = sym === selectedPair ? 'active' : '';
+  const html = Object.keys(PAIRS_DECIMALS).map(sym => {
+    const price = STATE.prices[sym];
+    const dec = PAIRS_DECIMALS[sym];
     return `
-      <div class="pair-card ${active}" onclick="selectPair('${sym}')">
+      <div class="pair-card">
         <div class="pair-symbol">${sym}</div>
-        <div class="pair-price" style="color:${diff>=0?'#4ade80':'#f87171'};">${p.price.toFixed(p.decimals)}</div>
-        <div class="pair-change ${cls}">${sign}${pct.toFixed(2)}%</div>
+        <div class="pair-price">${price ? price.toFixed(dec) : '...'}</div>
       </div>
     `;
   }).join('');
   document.getElementById('pairs-grid').innerHTML = html;
 }
 
-window.selectPair = function(sym) {
-  selectedPair = sym;
-  renderPairs();
-  renderSelectedPair();
-};
-
-function renderSelectedPair() {
-  const p = PAIRS[selectedPair];
-  const hist = PAIR_HISTORY[selectedPair];
-  document.getElementById('selected-pair-label').textContent = selectedPair;
-  document.getElementById('big-price').textContent = p.price.toFixed(p.decimals);
-  const start = hist[0] || p.price;
-  const diff = p.price - start;
-  const pct = (diff / start * 100);
-  const sign = diff >= 0 ? '+' : '';
-  document.getElementById('price-change').innerHTML = `<span style="color:${diff >= 0 ? '#4ade80' : '#f87171'};">${sign}${diff.toFixed(p.decimals)} (${sign}${pct.toFixed(3)}%)</span>`;
-  document.getElementById('big-price').style.color = diff >= 0 ? '#4ade80' : '#f87171';
-
-  if (hist.length < 2) { document.getElementById('mini-chart').innerHTML = ''; return; }
-  const max = Math.max(...hist);
-  const min = Math.min(...hist);
-  const range = max - min || p.pip;
-  document.getElementById('mini-chart').innerHTML = hist.map(v => {
-    const h = ((v - min) / range) * 100;
-    return `<div class="chart-bar" style="height: ${Math.max(4, h)}%"></div>`;
-  }).join('');
-}
-
 function renderLeaderboard() {
-  const sorted = [...TRADERS].sort((a,b) => (b.balance + getTotalOpenPnL(b)) - (a.balance + getTotalOpenPnL(a)));
-  const html = sorted.map(t => {
-    const equity = t.balance + getTotalOpenPnL(t);
-    const pct = ((equity - 10000) / 10000 * 100);
-    const pctClass = pct >= 0 ? 'profit-positive' : 'profit-negative';
-    const winRate = (t.wins + t.losses) === 0 ? 0 : (t.wins / (t.wins + t.losses) * 100);
-    return `
-      <div class="trader-card" onclick="openTraderDetail(${t.id})">
-        <div class="trader-header">
-          <div class="trader-avatar" style="background:${t.color}33; color:${t.color};">${t.emoji}</div>
-          <div class="trader-info">
-            <div class="trader-name">${t.name}</div>
-            <div class="trader-style">${t.style}</div>
-            <div class="trader-pairs">Pairs: ${t.preferredPairs.join(', ')}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="${pctClass}" style="font-weight:700; font-size:14px;">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
-            <div style="font-size:10px; color:#94a3b8;">$${equity.toFixed(2)}</div>
-          </div>
+  if (!STATE.traders.length) {
+    document.getElementById('leaderboard').innerHTML = '<div class="empty-state">No traders</div>';
+    return;
+  }
+  const sorted = [...STATE.traders].sort((a,b) => b.equity - a.equity);
+  const html = sorted.map(t => `
+    <div class="trader-card" onclick="openTraderDetail(${t.id})">
+      <div class="trader-header">
+        <div class="trader-avatar" style="background:${t.color}33; color:${t.color};">${t.emoji}</div>
+        <div class="trader-info">
+          <div class="trader-name">${t.name}</div>
+          <div class="trader-style">${t.style}</div>
+          <div class="trader-pairs">Pairs: ${(t.preferred_pairs || []).join(', ')}</div>
+          <div class="trader-ai">AI: ${t.ai_provider}/${t.ai_model.split(/[\/:]/)[0]}</div>
         </div>
-        <div class="trader-stats">
-          <div class="stat-box"><div class="stat-label">Trades</div><div class="stat-value">${t.wins + t.losses}</div></div>
-          <div class="stat-box"><div class="stat-label">Win Rate</div><div class="stat-value">${winRate.toFixed(0)}%</div></div>
-          <div class="stat-box"><div class="stat-label">Open</div><div class="stat-value">${t.openTrades.length}</div></div>
+        <div style="text-align:right;">
+          <div class="${t.return_pct>=0?'profit-positive':'profit-negative'}" style="font-weight:700; font-size:14px;">${t.return_pct>=0?'+':''}${t.return_pct.toFixed(2)}%</div>
+          <div style="font-size:10px; color:#94a3b8;">$${t.equity.toFixed(2)}</div>
         </div>
       </div>
-    `;
-  }).join('');
+      <div class="trader-stats">
+        <div class="stat-box"><div class="stat-label">Trades</div><div class="stat-value">${t.total_trades}</div></div>
+        <div class="stat-box"><div class="stat-label">Win Rate</div><div class="stat-value">${t.win_rate.toFixed(0)}%</div></div>
+        <div class="stat-box"><div class="stat-label">Open</div><div class="stat-value">${t.open_count}</div></div>
+      </div>
+    </div>
+  `).join('');
   document.getElementById('leaderboard').innerHTML = html;
 }
 
-function renderLiveTrades() {
-  const recent = liveTrades.slice(0, 20);
-  if (recent.length === 0) {
-    document.getElementById('live-trades').innerHTML = '<div class="empty-state">Menunggu trade pertama...</div>';
+function renderOpenPositions() {
+  document.getElementById('open-count').textContent = `${STATE.openTrades.length} posisi`;
+  if (!STATE.openTrades.length) {
+    document.getElementById('open-positions').innerHTML = '<div class="empty-state">Belum ada posisi terbuka</div>';
     return;
   }
-  const html = recent.map(t => {
-    const cls = t.type === 'BUY' ? 'buy' : t.type === 'SELL' ? 'sell' : 'close';
-    const timeStr = t.time.toLocaleTimeString('id-ID');
-    const pair = PAIRS[t.pair];
-    const newsHtml = t.newsContext && t.newsContext.length
-      ? '<div style="margin-top:4px;">' + t.newsContext.map(n=>`<span class="news-tag">📰 ${n.substring(0,40)}...</span>`).join('') + '</div>'
-      : '';
-    const pnlHtml = t.pnl !== undefined
-      ? `<span class="${t.pnl >= 0 ? 'profit-positive' : 'profit-negative'}" style="font-weight:700;">${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}</span>` : '';
+  const sorted = [...STATE.openTrades].sort((a,b) => b.live_pnl - a.live_pnl);
+  const html = sorted.map(t => {
+    const trader = STATE.traders.find(x => x.id === t.trader_id) || {};
+    const dec = PAIRS_DECIMALS[t.pair];
     return `
-      <div class="live-trade ${cls}">
+      <div class="live-trade ${t.action.toLowerCase()}">
         <div class="trade-head">
           <div>
-            <span style="color:${t.trader.color};">${t.trader.emoji}</span>
-            <strong>${t.trader.name}</strong>
+            <span style="color:${trader.color};">${trader.emoji}</span>
+            <strong>${trader.name}</strong>
             <span class="pair-tag">${t.pair}</span>
-            <span class="trade-action action-${t.type}">${t.type}</span>
-            ${t.lot ? `<span style="color:#94a3b8;">${t.lot} lot</span>` : ''}
-            @ ${t.price.toFixed(pair.decimals)}
+            <span class="trade-action action-${t.action}">${t.action}</span>
+            <span style="color:#94a3b8;">${t.lot_size} lot</span>
           </div>
-          ${pnlHtml}
+          <div class="${t.live_pnl >= 0 ? 'profit-positive' : 'profit-negative'}" style="font-weight:700;">${t.live_pnl >= 0 ? '+' : ''}$${t.live_pnl.toFixed(2)}</div>
         </div>
-        <div class="trade-reason">💭 ${t.reason}</div>
-        ${newsHtml}
-        <div class="trade-time">${timeStr}</div>
+        <div style="font-size:11px; color:#94a3b8;">Entry: <strong>${parseFloat(t.entry_price).toFixed(dec)}</strong> | Now: <strong>${t.current_price.toFixed(dec)}</strong></div>
+        ${t.reasoning ? `<div class="trade-reason">💭 ${t.reasoning}</div>` : ''}
       </div>
     `;
   }).join('');
-  document.getElementById('live-trades').innerHTML = html;
-}
-
-function renderOpenPositions() {
-  const allOpen = [];
-  TRADERS.forEach(t => {
-    t.openTrades.forEach(tr => allOpen.push({ trader: t, trade: tr }));
-  });
-  document.getElementById('open-count').textContent = `${allOpen.length} posisi`;
-  document.getElementById('total-open').textContent = allOpen.length;
-
-  if (allOpen.length === 0) {
-    document.getElementById('positions-body').innerHTML = '<div class="empty-state">Belum ada posisi terbuka</div>';
-    return;
-  }
-  // Sort by P/L
-  allOpen.sort((a,b) => getOpenPnL(b.trade) - getOpenPnL(a.trade));
-  const html = allOpen.map(({trader, trade}) => {
-    const pnl = getOpenPnL(trade);
-    const pair = PAIRS[trade.pair];
-    return `
-      <div class="position-row">
-        <div>
-          <span style="color:${trader.color};">${trader.emoji}</span> ${trader.name}
-          <div style="font-size:10px;color:#94a3b8;"><span class="pair-tag">${trade.pair}</span> ${trade.lot} lot</div>
-        </div>
-        <div><span class="trade-action action-${trade.action}">${trade.action}</span></div>
-        <div style="font-family:monospace;font-size:11px;">${trade.entry.toFixed(pair.decimals)}</div>
-        <div style="font-family:monospace;font-size:11px;">${pair.price.toFixed(pair.decimals)}</div>
-        <div class="${pnl >= 0 ? 'profit-positive' : 'profit-negative'}" style="font-weight:700;">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</div>
-      </div>
-    `;
-  }).join('');
-  document.getElementById('positions-body').innerHTML = html;
+  document.getElementById('open-positions').innerHTML = html;
 }
 
 function renderNews() {
-  const html = currentNews.map(n => `
+  if (!STATE.news.length) {
+    document.getElementById('news-list').innerHTML = '<div class="empty-state">Belum ada news</div>';
+    return;
+  }
+  const html = STATE.news.map(n => `
     <div class="news-item">
       <div class="news-title">
-        ${n.pairs.map(p => `<span class="news-pair-tag">${p}</span>`).join('')}
+        ${(n.affected_pairs || []).map(p => `<span class="pair-tag">${p}</span>`).join('')}
         ${n.title}
       </div>
       <div class="news-meta">
-        ${n.source} • ${n.time.toLocaleTimeString('id-ID')}
-        <span class="news-sentiment sent-${n.sentiment}">${n.sentiment.toUpperCase()}</span>
+        ${n.source || 'Unknown'} • ${new Date(n.published_at).toLocaleTimeString('id-ID')}
+        <span class="news-sentiment sent-${n.sentiment}">${(n.sentiment || 'neutral').toUpperCase()}</span>
       </div>
     </div>
   `).join('');
   document.getElementById('news-list').innerHTML = html;
 }
 
-function getFilteredHistory() {
+function getFiltered() {
   const ft = document.getElementById('filter-trader').value;
   const fp = document.getElementById('filter-pair').value;
   const fa = document.getElementById('filter-action').value;
   const fr = document.getElementById('filter-result').value;
-  const fs = document.getElementById('filter-search').value.toLowerCase();
-  return allHistory.filter(h => {
-    if (ft !== 'all' && h.trader.id !== parseInt(ft)) return false;
+  return STATE.closedTrades.filter(h => {
+    if (ft !== 'all' && h.trader_id !== parseInt(ft)) return false;
     if (fp !== 'all' && h.pair !== fp) return false;
     if (fa !== 'all' && h.action !== fa) return false;
     if (fr === 'profit' && h.pnl < 0) return false;
     if (fr === 'loss' && h.pnl >= 0) return false;
-    if (fs && !h.reason.toLowerCase().includes(fs)) return false;
     return true;
   });
 }
 
 function renderHistory() {
-  const filtered = getFilteredHistory();
-  document.getElementById('history-count').textContent = `${filtered.length} dari ${allHistory.length} trade`;
-  if (filtered.length === 0) {
-    document.getElementById('history-list').innerHTML = '<div class="empty-state">Tidak ada trade yang cocok</div>';
+  const filtered = getFiltered();
+  document.getElementById('history-count').textContent = `${filtered.length} dari ${STATE.closedTrades.length} trade`;
+  if (!filtered.length) {
+    document.getElementById('history-list').innerHTML = '<div class="empty-state">Tidak ada trade</div>';
     return;
   }
   const html = filtered.slice(0, 50).map(h => {
-    const duration = Math.round((h.closedAt - h.openedAt) / 1000);
-    const pair = PAIRS[h.pair];
+    const trader = STATE.traders.find(x => x.id === h.trader_id) || {};
+    const dec = PAIRS_DECIMALS[h.pair];
+    const duration = h.closed_at && h.opened_at
+      ? Math.round((new Date(h.closed_at) - new Date(h.opened_at)) / 1000)
+      : 0;
     return `
       <div class="history-item">
         <div class="history-top">
           <div class="history-trader">
-            <div class="history-trader-avatar" style="background:${h.trader.color}33; color:${h.trader.color};">${h.trader.emoji}</div>
-            ${h.trader.name}
+            <div class="history-trader-avatar" style="background:${trader.color}33; color:${trader.color};">${trader.emoji}</div>
+            ${trader.name}
             <span class="pair-tag">${h.pair}</span>
             <span class="trade-action action-${h.action}">${h.action}</span>
           </div>
-          <div class="history-pnl ${h.pnl >= 0 ? 'profit-positive' : 'profit-negative'}">
-            ${h.pnl >= 0 ? '+' : ''}$${h.pnl.toFixed(2)}
-          </div>
+          <div class="history-pnl ${h.pnl >= 0 ? 'profit-positive' : 'profit-negative'}">${h.pnl >= 0 ? '+' : ''}$${parseFloat(h.pnl).toFixed(2)}</div>
         </div>
         <div class="history-details">
-          <span>📍 Entry: <strong>${h.entry.toFixed(pair.decimals)}</strong></span>
-          <span>🏁 Exit: <strong>${h.exit.toFixed(pair.decimals)}</strong></span>
-          <span>📦 ${h.lot} lot</span>
-          <span>⏱️ ${duration}s</span>
-          <span>🕐 ${h.closedAt.toLocaleTimeString('id-ID')}</span>
+          <span>📍 ${parseFloat(h.entry_price).toFixed(dec)}</span>
+          <span>🏁 ${parseFloat(h.exit_price).toFixed(dec)}</span>
+          <span>📦 ${h.lot_size} lot</span>
+          ${duration ? `<span>⏱️ ${duration<60?duration+'s':Math.round(duration/60)+'m'}</span>` : ''}
+          <span>🕐 ${new Date(h.closed_at).toLocaleString('id-ID')}</span>
         </div>
-        <div class="history-reason">💭 <strong>Alasan:</strong> ${h.reason}</div>
+        ${h.reasoning ? `<div class="history-reason">💭 ${h.reasoning}</div>` : ''}
       </div>
     `;
   }).join('');
   document.getElementById('history-list').innerHTML = html;
 }
 
-function recordEquitySnapshot() {
-  TRADERS.forEach(t => {
-    t.equityHistory.push(t.balance + getTotalOpenPnL(t));
-    if (t.equityHistory.length > 100) t.equityHistory.shift();
-  });
-}
-
-function renderEquityCurve() {
+function renderEquity() {
   const W = 800, H = 220, padX = 40, padY = 20;
   const svg = document.getElementById('equity-svg');
-  const maxLen = Math.max(...TRADERS.map(t => t.equityHistory.length));
+  const histArr = Object.keys(STATE.equityHistory).map(k => ({ id: parseInt(k), points: STATE.equityHistory[k] }));
+  const maxLen = Math.max(...histArr.map(h => h.points.length), 0);
   if (maxLen < 2) {
-    svg.innerHTML = '<text x="400" y="110" fill="#64748b" font-size="12" text-anchor="middle">Mengumpulkan data...</text>';
+    svg.innerHTML = '<text x="400" y="110" fill="#64748b" font-size="12" text-anchor="middle">Belum ada data equity (jalankan beberapa cycle dulu)</text>';
+    document.getElementById('equity-legend').innerHTML = '';
     return;
   }
-  const allValues = TRADERS.flatMap(t => t.equityHistory);
-  let minV = Math.min(...allValues, 9800);
-  let maxV = Math.max(...allValues, 10200);
+  const allVals = histArr.flatMap(h => h.points.map(p => p.equity));
+  let minV = Math.min(...allVals, 9800);
+  let maxV = Math.max(...allVals, 10200);
   const pad = (maxV - minV) * 0.1;
   minV -= pad; maxV += pad;
-
   const xStep = (W - padX*2) / (maxLen - 1);
   const yScale = (H - padY*2) / (maxV - minV);
 
@@ -1096,181 +680,147 @@ function renderEquityCurve() {
   grid += `<text x="${W-padX+4}" y="${baseY+3}" fill="#64748b" font-size="9">$10k</text>`;
 
   let lines = '';
-  TRADERS.forEach(t => {
-    if (!visibleTraders.has(t.id)) return;
-    const eh = t.equityHistory;
-    if (eh.length < 2) return;
-    const offset = maxLen - eh.length;
-    const points = eh.map((v, i) => {
+  for (const h of histArr) {
+    if (!STATE.visibleTraders.has(h.id)) continue;
+    const trader = STATE.traders.find(t => t.id === h.id);
+    if (!trader || h.points.length < 2) continue;
+    const offset = maxLen - h.points.length;
+    const pts = h.points.map((p, i) => {
       const x = padX + (offset + i) * xStep;
-      const y = padY + (maxV - v) * yScale;
+      const y = padY + (maxV - p.equity) * yScale;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(' ');
-    lines += `<polyline points="${points}" fill="none" stroke="${t.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-    const lastX = padX + (maxLen - 1) * xStep;
-    const lastY = padY + (maxV - eh[eh.length-1]) * yScale;
-    lines += `<circle cx="${lastX}" cy="${lastY}" r="3" fill="${t.color}"/>`;
-  });
+    lines += `<polyline points="${pts}" fill="none" stroke="${trader.color}" stroke-width="2" stroke-linejoin="round"/>`;
+  }
   svg.innerHTML = grid + lines;
 
-  document.getElementById('equity-legend').innerHTML = TRADERS.map(t => {
-    const equity = t.balance + getTotalOpenPnL(t);
-    const pct = ((equity - 10000) / 10000 * 100);
-    const dim = visibleTraders.has(t.id) ? '' : 'dimmed';
+  document.getElementById('equity-legend').innerHTML = STATE.traders.map(t => {
+    const dim = STATE.visibleTraders.has(t.id) ? '' : 'dimmed';
     return `<div class="legend-item ${dim}" onclick="toggleTrader(${t.id})">
       <div class="legend-dot" style="background:${t.color};"></div>
-      ${t.emoji} ${t.name.split(' ')[0]} <span style="color:${pct>=0?'#4ade80':'#f87171'}; font-weight:700;">${pct>=0?'+':''}${pct.toFixed(1)}%</span>
+      ${t.emoji} ${t.name.split(' ')[0]} <span style="color:${t.return_pct>=0?'#4ade80':'#f87171'}; font-weight:700;">${t.return_pct>=0?'+':''}${t.return_pct.toFixed(1)}%</span>
     </div>`;
   }).join('');
 }
 
-window.toggleTrader = function(id) {
-  if (visibleTraders.has(id)) visibleTraders.delete(id);
-  else visibleTraders.add(id);
-  renderEquityCurve();
+window.toggleTrader = id => {
+  if (STATE.visibleTraders.has(id)) STATE.visibleTraders.delete(id);
+  else STATE.visibleTraders.add(id);
+  renderEquity();
 };
 
-// ============================================
-// TRADER DETAIL
-// ============================================
-window.openTraderDetail = function(id) {
-  const t = TRADERS.find(x => x.id === id);
+window.openTraderDetail = id => {
+  const t = STATE.traders.find(x => x.id === id);
   if (!t) return;
-  const equity = t.balance + getTotalOpenPnL(t);
-  const pct = ((equity - 10000) / 10000 * 100);
-  const winRate = (t.wins + t.losses) === 0 ? 0 : (t.wins / (t.wins + t.losses) * 100);
-  const totalTrades = t.wins + t.losses;
-
-  // Group history by pair
-  const byPair = {};
-  t.history.forEach(h => {
-    if (!byPair[h.pair]) byPair[h.pair] = { count: 0, pnl: 0 };
-    byPair[h.pair].count++;
-    byPair[h.pair].pnl += h.pnl;
-  });
-  const pairStatsHtml = Object.keys(byPair).map(p => `
-    <div class="detail-stat" style="text-align:left;">
-      <div class="detail-stat-label"><span class="pair-tag">${p}</span></div>
-      <div style="font-size:13px; font-weight:700; margin-top:4px;">${byPair[p].count} trades</div>
-      <div class="${byPair[p].pnl >= 0 ? 'profit-positive' : 'profit-negative'}" style="font-size:12px;">${byPair[p].pnl >= 0 ? '+' : ''}$${byPair[p].pnl.toFixed(2)}</div>
-    </div>
-  `).join('');
+  const myHistory = STATE.closedTrades.filter(h => h.trader_id === id);
+  const myOpen = STATE.openTrades.filter(o => o.trader_id === id);
 
   document.getElementById('modal-title').innerHTML = `<span style="color:${t.color};">${t.emoji}</span> ${t.name}`;
   document.getElementById('trader-detail-body').innerHTML = `
-    <div class="detail-header">
-      <div class="trader-avatar" style="background:${t.color}33; color:${t.color}; width:60px; height:60px; font-size:32px;">${t.emoji}</div>
-      <div>
-        <div style="font-size:20px; font-weight:800;">${t.name}</div>
-        <div style="font-size:13px; color:#94a3b8;">${t.style}</div>
-        <div style="font-size:11px; color:#64748b; margin-top:4px;">Trading di: ${t.preferredPairs.map(p=>`<span class="pair-tag">${p}</span>`).join(' ')}</div>
-        <button class="btn" style="margin-top:8px; font-size:11px; padding:4px 10px;" onclick="openChat(${t.id})">💬 Chat dengan ${t.name.split(' ')[0]}</button>
-      </div>
+    <div style="margin-bottom: 16px;">
+      <div style="font-size:13px; color:#94a3b8;">${t.style}</div>
+      <div style="font-size:11px; color:#64748b; margin-top:4px;">🤖 AI: <strong>${t.ai_provider}</strong> / ${t.ai_model}</div>
+      <div style="font-size:11px; color:#64748b;">💱 Pairs: ${t.preferred_pairs.join(', ')}</div>
+      <button class="btn" style="margin-top:8px;" onclick="openChat(${t.id})">💬 Chat dengan ${t.name.split(' ')[0]}</button>
     </div>
     <div class="detail-stats">
-      <div class="detail-stat"><div class="detail-stat-label">Equity</div><div class="detail-stat-value">$${equity.toFixed(0)}</div></div>
-      <div class="detail-stat"><div class="detail-stat-label">Return</div><div class="detail-stat-value ${pct>=0?'profit-positive':'profit-negative'}">${pct>=0?'+':''}${pct.toFixed(2)}%</div></div>
-      <div class="detail-stat"><div class="detail-stat-label">Win Rate</div><div class="detail-stat-value">${winRate.toFixed(0)}%</div></div>
-      <div class="detail-stat"><div class="detail-stat-label">Trades</div><div class="detail-stat-value">${totalTrades}</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">Equity</div><div class="detail-stat-value">$${t.equity.toFixed(0)}</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">Return</div><div class="detail-stat-value ${t.return_pct>=0?'profit-positive':'profit-negative'}">${t.return_pct>=0?'+':''}${t.return_pct.toFixed(2)}%</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">Win Rate</div><div class="detail-stat-value">${t.win_rate.toFixed(0)}%</div></div>
+      <div class="detail-stat"><div class="detail-stat-label">Trades</div><div class="detail-stat-value">${t.total_trades}</div></div>
     </div>
-    <div class="detail-section-title">📊 Equity Curve</div>
-    <svg viewBox="0 0 600 120" style="width:100%; height:120px;" id="detail-equity-svg"></svg>
-    ${Object.keys(byPair).length > 0 ? `
-      <div class="detail-section-title">💱 Performa per Pair</div>
-      <div class="detail-stats">${pairStatsHtml}</div>
-    ` : ''}
-    <div class="detail-section-title">📜 Riwayat Trade (${t.history.length})</div>
-    <div style="max-height:300px; overflow-y:auto;">
-      ${t.history.length === 0 ? '<div class="empty-state">Belum ada trade tertutup</div>' :
-        t.history.slice(0,20).map(h => `
-          <div class="history-item">
-            <div class="history-top">
-              <div><span class="pair-tag">${h.pair}</span> <span class="trade-action action-${h.action}">${h.action}</span> ${h.lot} lot @ ${h.entry.toFixed(PAIRS[h.pair].decimals)}</div>
-              <div class="history-pnl ${h.pnl>=0?'profit-positive':'profit-negative'}">${h.pnl>=0?'+':''}$${h.pnl.toFixed(2)}</div>
-            </div>
-            <div class="history-reason">💭 ${h.reason}</div>
+    ${myOpen.length ? `
+      <div class="detail-section-title">📌 Open Positions (${myOpen.length})</div>
+      ${myOpen.map(o => `
+        <div class="live-trade ${o.action.toLowerCase()}">
+          <div><span class="pair-tag">${o.pair}</span> <span class="trade-action action-${o.action}">${o.action}</span> ${o.lot_size} lot
+            <span style="float:right;" class="${o.live_pnl>=0?'profit-positive':'profit-negative'}"><strong>${o.live_pnl>=0?'+':''}$${o.live_pnl.toFixed(2)}</strong></span>
           </div>
-        `).join('')
+          ${o.reasoning ? `<div class="trade-reason" style="margin-top:6px;">💭 ${o.reasoning}</div>` : ''}
+        </div>
+      `).join('')}
+    ` : ''}
+    <div class="detail-section-title">📜 Riwayat Trade (${myHistory.length})</div>
+    <div style="max-height:300px; overflow-y:auto;">
+      ${myHistory.length === 0 ? '<div class="empty-state">Belum ada trade tertutup</div>' :
+        myHistory.slice(0,20).map(h => {
+          const dec = PAIRS_DECIMALS[h.pair];
+          return `
+            <div class="history-item">
+              <div class="history-top">
+                <div><span class="pair-tag">${h.pair}</span> <span class="trade-action action-${h.action}">${h.action}</span> ${h.lot_size} lot @ ${parseFloat(h.entry_price).toFixed(dec)}</div>
+                <div class="history-pnl ${h.pnl>=0?'profit-positive':'profit-negative'}">${h.pnl>=0?'+':''}$${parseFloat(h.pnl).toFixed(2)}</div>
+              </div>
+              ${h.reasoning ? `<div class="history-reason">💭 ${h.reasoning}</div>` : ''}
+            </div>
+          `;
+        }).join('')
       }
     </div>
   `;
-  const svg = document.getElementById('detail-equity-svg');
-  if (t.equityHistory.length >= 2) {
-    const W=600, H=120, p=10;
-    const min = Math.min(...t.equityHistory) - 50;
-    const max = Math.max(...t.equityHistory) + 50;
-    const xs = (W-p*2) / (t.equityHistory.length-1);
-    const ys = (H-p*2) / (max-min);
-    const points = t.equityHistory.map((v,i)=>`${(p+i*xs).toFixed(1)},${(p+(max-v)*ys).toFixed(1)}`).join(' ');
-    svg.innerHTML = `<polyline points="${points}" fill="none" stroke="${t.color}" stroke-width="2"/>`;
-  }
   document.getElementById('trader-modal').classList.add('show');
 };
 
-window.closeModal = function(id) {
-  document.getElementById(id).classList.remove('show');
-};
+window.closeModal = id => document.getElementById(id).classList.remove('show');
 
-// ============================================
 // CHAT
-// ============================================
 let currentChatTrader = null;
 const chatHistory = {};
 
-window.openChat = function(id) {
-  const t = TRADERS.find(x => x.id === id);
+window.openChat = id => {
+  const t = STATE.traders.find(x => x.id === id);
+  if (!t) return;
   currentChatTrader = t;
   document.getElementById('chat-title').innerHTML = `💬 Chat with <span style="color:${t.color};">${t.emoji}</span> ${t.name}`;
   if (!chatHistory[id]) {
-    chatHistory[id] = [
-      { from: 'ai', text: `Halo! Saya ${t.name}. Saya trading di ${t.preferredPairs.join(', ')}. Ada yang mau ditanyakan?` }
-    ];
+    chatHistory[id] = [{ from: 'ai', text: `Halo! Saya ${t.name}. Tanya apa saja tentang strategi atau trade saya!` }];
   }
   renderChat();
   document.getElementById('chat-modal').classList.add('show');
-  setTimeout(()=>document.getElementById('chat-input').focus(), 200);
+  setTimeout(() => document.getElementById('chat-input').focus(), 200);
 };
 
 function renderChat() {
   if (!currentChatTrader) return;
   const msgs = chatHistory[currentChatTrader.id] || [];
   document.getElementById('chat-messages').innerHTML = msgs.map(m =>
-    `<div class="chat-bubble ${m.from}">${m.text}</div>`
+    `<div class="chat-bubble ${m.from}${m.loading ? ' loading' : ''}">${m.text}</div>`
   ).join('');
   const c = document.getElementById('chat-messages');
   c.scrollTop = c.scrollHeight;
 }
 
-function sendChat() {
+async function sendChat() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text || !currentChatTrader) return;
   const id = currentChatTrader.id;
   chatHistory[id].push({ from: 'user', text });
+  chatHistory[id].push({ from: 'ai', text: 'Berpikir...', loading: true });
   input.value = '';
   renderChat();
-  setTimeout(() => {
-    const t = currentChatTrader;
-    const responses = CHAT_RESPONSES[id];
-    let reply = responses[Math.floor(Math.random()*responses.length)];
-    const lower = text.toLowerCase();
-    if (lower.includes('profit') || lower.includes('untung')) {
-      const equity = t.balance + getTotalOpenPnL(t);
-      const pct = ((equity - 10000) / 10000 * 100);
-      reply = `Saat ini saya ${pct>=0?'profit':'loss'} ${pct.toFixed(2)}% dengan equity $${equity.toFixed(2)}. ${reply}`;
-    } else if (lower.includes('pair')) {
-      reply = `Saya trade di ${t.preferredPairs.join(', ')}. ${reply}`;
-    } else if (lower.includes('posisi') || lower.includes('open')) {
-      if (t.openTrades.length === 0) reply = `Saat ini saya belum punya posisi terbuka. Lagi nunggu setup yang bagus.`;
-      else reply = `Saya punya ${t.openTrades.length} posisi terbuka: ${t.openTrades.map(tr => `${tr.pair} ${tr.action}`).join(', ')}. ${reply}`;
-    } else if (lower.includes('strategi') || lower.includes('strategy')) {
-      reply = `Strategi saya: ${t.style}. ${reply}`;
-    } else if (lower.includes('halo') || lower.includes('hai') || lower.includes('hi')) {
-      reply = `Halo juga! ${reply}`;
+  document.getElementById('chat-send').disabled = true;
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trader_id: id, message: text })
+    });
+    const data = await res.json();
+    // remove loading
+    chatHistory[id] = chatHistory[id].filter(m => !m.loading);
+    if (data.error) {
+      chatHistory[id].push({ from: 'ai', text: '❌ Error: ' + data.error });
+    } else {
+      chatHistory[id].push({ from: 'ai', text: data.reply });
     }
-    chatHistory[id].push({ from: 'ai', text: reply });
-    renderChat();
-  }, 600 + Math.random()*800);
+  } catch (err) {
+    chatHistory[id] = chatHistory[id].filter(m => !m.loading);
+    chatHistory[id].push({ from: 'ai', text: '❌ Network error: ' + err.message });
+  }
+  document.getElementById('chat-send').disabled = false;
+  renderChat();
 }
 
 document.getElementById('chat-send').addEventListener('click', sendChat);
@@ -1278,128 +828,47 @@ document.getElementById('chat-input').addEventListener('keypress', e => {
   if (e.key === 'Enter') sendChat();
 });
 
-// ============================================
-// SETTINGS
-// ============================================
-function applySpeed(ms) {
-  currentSpeed = ms;
-  if (cycleInterval) clearInterval(cycleInterval);
-  if (!isPaused) cycleInterval = setInterval(tradingCycle, ms);
-  document.querySelectorAll('.speed-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.speed) === ms);
-  });
-}
-
-document.querySelectorAll('.speed-btn').forEach(b => {
-  b.addEventListener('click', () => applySpeed(parseInt(b.dataset.speed)));
-});
-
-document.getElementById('pause-btn').addEventListener('click', () => {
-  isPaused = !isPaused;
-  const btn = document.getElementById('pause-btn');
-  const badge = document.getElementById('live-badge');
-  if (isPaused) {
-    clearInterval(cycleInterval);
-    clearInterval(priceInterval);
-    btn.textContent = '▶ Resume';
-    badge.classList.add('paused');
-    badge.innerHTML = '<span class="pulse"></span>PAUSED';
-  } else {
-    cycleInterval = setInterval(tradingCycle, currentSpeed);
-    priceInterval = setInterval(tick, 1500);
-    btn.textContent = '⏸ Pause';
-    badge.classList.remove('paused');
-    badge.innerHTML = '<span class="pulse"></span>LIVE';
-  }
-});
-
-document.getElementById('reset-btn').addEventListener('click', () => {
-  if (!confirm('Reset semua data? History akan hilang.')) return;
-  TRADERS.forEach(t => {
-    t.balance = 10000;
-    t.openTrades = [];
-    t.history = [];
-    t.wins = 0;
-    t.losses = 0;
-    t.equityHistory = [10000];
-  });
-  allHistory = [];
-  liveTrades = [];
-  cycleCount = 0;
-  renderAll();
-});
-
-document.getElementById('settings-btn').addEventListener('click', () => {
-  document.getElementById('settings-modal').classList.add('show');
-});
-
+document.getElementById('refresh-btn').addEventListener('click', fetchData);
+document.getElementById('run-cycle-btn').addEventListener('click', triggerCycle);
 document.getElementById('theme-btn').addEventListener('click', () => {
   document.body.classList.toggle('light');
   document.getElementById('theme-btn').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
 });
 
 // Filters
-['filter-trader','filter-pair','filter-action','filter-result','filter-search'].forEach(id => {
-  document.getElementById(id).addEventListener('input', renderHistory);
+['filter-trader','filter-pair','filter-action','filter-result'].forEach(id => {
   document.getElementById(id).addEventListener('change', renderHistory);
 });
 document.getElementById('filter-clear').addEventListener('click', () => {
   ['filter-trader','filter-pair','filter-action','filter-result'].forEach(id => document.getElementById(id).value = 'all');
-  document.getElementById('filter-search').value = '';
   renderHistory();
 });
 
-// Populate filter options
-document.getElementById('filter-trader').innerHTML = '<option value="all">Semua Trader</option>' +
-  TRADERS.map(t => `<option value="${t.id}">${t.emoji} ${t.name}</option>`).join('');
-document.getElementById('filter-pair').innerHTML = '<option value="all">Semua Pair</option>' +
-  Object.keys(PAIRS).map(p => `<option value="${p}">${p}</option>`).join('');
-
-// Close modal on backdrop click
-document.querySelectorAll('.modal-backdrop').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) m.classList.remove('show');
-  });
-});
-
-// ============================================
-// MAIN LOOP
-// ============================================
-function tick() {
-  tickPrices();
-  renderPairs();
-  renderSelectedPair();
-  renderOpenPositions();
-  renderLeaderboard();
-}
-
-function tradingCycle() {
-  cycleCount++;
-  document.getElementById('cycle-count').textContent = cycleCount;
-  generateNews();
-  TRADERS.forEach(t => makeDecision(t));
-  recordEquitySnapshot();
-  renderAll();
+// Populate filter dropdowns
+function populateFilters() {
+  document.getElementById('filter-trader').innerHTML = '<option value="all">Semua Trader</option>' +
+    STATE.traders.map(t => `<option value="${t.id}">${t.emoji} ${t.name}</option>`).join('');
+  document.getElementById('filter-pair').innerHTML = '<option value="all">Semua Pair</option>' +
+    Object.keys(PAIRS_DECIMALS).map(p => `<option value="${p}">${p}</option>`).join('');
 }
 
 function renderAll() {
+  populateFilters();
   renderPairs();
-  renderSelectedPair();
   renderLeaderboard();
-  renderLiveTrades();
   renderOpenPositions();
   renderNews();
   renderHistory();
-  renderEquityCurve();
+  renderEquity();
 }
 
-// Init
-for (let i = 0; i < 30; i++) tickPrices();
-generateNews();
-renderAll();
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); });
+});
 
-priceInterval = setInterval(tick, 1500);
-cycleInterval = setInterval(tradingCycle, currentSpeed);
+// Initial load + poll every 30s
+fetchData();
+setInterval(fetchData, 30_000);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a007e4d65d1b5682',t:'MTc3OTU3OTUwMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a009139afc60ca88',t:'MTc3OTU5MTkwNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

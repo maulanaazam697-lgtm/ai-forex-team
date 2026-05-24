@@ -1,0 +1,15 @@
+{
+  "name": "ai-forex-team",
+  "version": "1.0.0",
+  "description": "AI Forex Trading Team - Multi-Pair Live Simulator with real AI",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
