@@ -322,7 +322,7 @@
         <div class="label">Last update</div>
         <div class="value" id="last-update" style="font-size: 11px;">-</div>
       </div>
-      <button class="run-cycle-btn" id="run-cycle-btn" title="Trigger AI cycle manually">⚡ Run Cycle</button>
+      <button class="run-cycle-btn" id="run-cycle-btn" title="Trigger AI cycle manually" style="display:none;">⚡ Run Cycle</button>
       <button class="icon-btn" id="refresh-btn" title="Refresh data">🔄</button>
       <button class="icon-btn" id="theme-btn" title="Toggle theme">🌙</button>
     </div>
@@ -829,7 +829,20 @@ document.getElementById('chat-input').addEventListener('keypress', e => {
 });
 
 document.getElementById('refresh-btn').addEventListener('click', fetchData);
-document.getElementById('run-cycle-btn').addEventListener('click', triggerCycle);
+// ============================================
+// ADMIN MODE: Show Run Cycle button only if URL has ?admin=YOUR-SECRET
+// Otherwise hide it (public view-only)
+// ============================================
+const ADMIN_SECRET = '9SmXb2ExxAHSztxigjHn';  // <-- ubah ini di GitHub!
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('admin') === ADMIN_SECRET) {
+  document.getElementById('run-cycle-btn').style.display = '';
+  document.getElementById('run-cycle-btn').addEventListener('click', triggerCycle);
+  console.log('🔓 Admin mode active');
+} else {
+  // Public mode: hide button, AI tetap auto-trade via cron-job.org
+  console.log('👁️ Public view-only mode');
+}
 document.getElementById('theme-btn').addEventListener('click', () => {
   document.body.classList.toggle('light');
   document.getElementById('theme-btn').textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
@@ -870,5 +883,5 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 fetchData();
 setInterval(fetchData, 30_000);
 </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a009139afc60ca88',t:'MTc3OTU5MTkwNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a00ae0893a6e58ef',t:'MTc3OTYxMDc4NA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
